@@ -10,6 +10,7 @@ import {
 	toggles
 } from './config'
 import { auth } from './middleware/auth'
+import { getoEmbed } from './utils/oEmbed'
 
 type CF = [env: Env, ctx: ExecutionContext]
 const router = Router<IRequestStrict, CF>()
@@ -97,21 +98,159 @@ router.get('/', async (request) => {
 
 router.get('/testpage', async (request: Request, env: Env) => {
 	try {
-		const stmt = env.DB.prepare('SELECT * FROM User');
-		const rows = await stmt.all();
+		const stmt = env.DB.prepare('SELECT * FROM User')
+		const rows = await stmt.all()
 		return new Response(JSON.stringify(rows), {
 			status: 200,
 			headers: { 'Content-Type': 'application/json' }
-		});
+		})
 	} catch (error) {
-		console.error('Error fetching data from database:', error);
-		return new Response(JSON.stringify({ success: false, error: error.message }), {
-			status: 500,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		console.error('Error fetching data from database:', error)
+		return new Response(
+			JSON.stringify({ success: false, error: error.message }),
+			{
+				status: 500,
+				headers: { 'Content-Type': 'application/json' }
+			}
+		)
 	}
-});
+})
 
+router.post('/upload', auth, async (request, env) => {
+	const url = new URL(request.url)
+	const filePrefix = request.headers.get('prefix') || ''
+	let fileslug = url.searchParams.get('filename')
+	if (!fileslug) {
+		fileslug = Math.floor(Date.now() / 1000).toString()
+	}
+	const fileName = `${filePrefix}${fileslug}`
+
+	const contentType = request.headers.get('Content-Type')
+	const contentLength = request.headers.get('Content-Length')
+	if (!contentType || !contentLength) {
+		return new Response(
+			JSON.stringify({
+				success: false,
+				error: 'Content-Type or Content-Length header missing'
+			}),
+			{ status: 400, headers: { 'Content-Type': 'application/json' } }
+		)
+	}
+
+	try {
+		await env.R2_BUCKET.put(fileName, request.body, {
+			httpMetadata: {
+				contentType: contentType,
+				cacheControl: 'public, max-age=604800'
+			}
+		})
+	} catch (error) {
+		console.error('Error uploading file:', error)
+		return new Response(
+			JSON.stringify({ success: false, error: 'Internal Server Error' }),
+			{ status: 500, headers: { 'Content-Type': 'application/json' } }
+		)
+	}
+
+	// Return the URL of the uploaded file
+	const returnUrl = new URL(request.url)
+	returnUrl.pathname = `/${fileName}`
+	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN) {
+		returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN
+		returnUrl.pathname = fileName
+	}
+
+	// Return delete URL to the user
+	const deleteUrl = new URL(request.url)
+	deleteUrl.pathname = '/delete'
+	deleteUrl.searchParams.set('file', fileName)
+	deleteUrl.searchParams.set('authkey', env.AUTH_KEY)
+
+	return new Response(
+		JSON.stringify({
+			success: true,
+			image: returnUrl.href,
+			deleteUrl: deleteUrl.href
+		}),
+		{
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		}
+	)
+})
+
+const getRawfile = async (
+	request: IRequestStrict,
+	env: Env,
+	ctx: ExecutionContext
+) => {
+	if (env.ONLY_ALLOW_ACCESS_TO_PUBLIC_BUCKET) {
+		return new Response('Not Found', { status: 404 })
+	}
+	const url = new URL(request.url)
+	const filename = url.pathname.split('/raw/')[1]
+	const file = await env.R2_BUCKET.get(filename)
+	if (!file) {
+		return new Response('Not Found', { status: 404 })
+	}
+	return new Response(await file.arrayBuffer(), {
+		headers: {
+			'Content-Type': file.httpMetadata.contentType,
+			'Cache-Control': env.CACHE_CONTROL || 'public, max-age=604800'
+		}
+	})
+}
+
+// Handle file retrieval for main page
+//todo: design the image page more :3
+const getFile = async (request: IRequestStrict, env: Env, ctx: ExecutionContext) => {
+	if (env.ONLY_ALLOW_ACCESS_TO_PUBLIC_BUCKET) {
+		return new Response('Not Found', { status: 404 })
+	}
+	const url = new URL(request.url);
+	const id = url.pathname.slice(1);
+	console.log(id);
+
+	if (!id) {
+		return new Response('Not Found', { status: 404 });
+	}
+
+	const imageUrl = `https://nyan.be/raw/${id}`;
+
+	return new Response(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta property="og:image" content="${imageUrl}" />
+			<meta name="twitter:card" content="summary_large_image">
+			<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}"> 
+			
+			<meta property="og:type" content="website" />
+			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" /> 
+			
+            <title>v1 boymoder.org</title>
+        </head>
+        <body>
+            <img src="${imageUrl}" />
+        </body>
+        </html>
+    `, {
+		headers: {
+			'content-type': 'text/html',
+		},
+	});
+};
+
+router.get('/raw/:filename', getRawfile)
+router.get('/raw/:filename/json', getoEmbed)
+router.get('/upload/:filename', getFile);
+router.get('/*', getFile);
+router.head('/*', getFile);
+router.get('/temp/*', getFile);
+router.head('/temp/*', getFile);
 
 router.all('/fake', () => {
 	return new Response('Not Found', { status: 404 })

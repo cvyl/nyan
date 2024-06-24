@@ -7,4 +7,5 @@ export interface Env {
 	CUSTOM_PUBLIC_BUCKET_DOMAIN?: string
 	ONLY_ALLOW_ACCESS_TO_PUBLIC_BUCKET?: boolean
 	DISCORD_WEBHOOK_URL?: string
+	REQUEST_WEBHOOK_URL?: string
 }

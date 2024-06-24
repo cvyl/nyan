@@ -12,6 +12,7 @@ node_modules/
 .mf
 .wrangler
 wrangler.toml
+dev.sql
 prisma/migrations/
 prisma/dev.db
 prisma/dev.db-journal
