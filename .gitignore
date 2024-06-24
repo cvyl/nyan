@@ -1,0 +1,17 @@
+/target
+/dist
+**/*.rs.bk
+Cargo.lock
+bin/
+pkg/
+wasm-pack.log
+worker/
+node_modules/
+.cargo-ok
+.env
+.mf
+.wrangler
+wrangler.toml
+prisma/migrations/
+prisma/dev.db
+prisma/dev.db-journal

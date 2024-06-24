@@ -1,0 +1,36 @@
+{
+	"name": "nyan",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"dev": "wrangler dev",
+		"build": "esbuild src/index.ts --format=esm --platform=neutral --bundle --minify --sourcemap --main-fields=browser,module,main --outfile=dist/index.mjs",
+		"preview": "wrangler preview --watch",
+		"deploy": "wrangler deploy",
+		"prettier": "prettier --check --ignore-path .gitignore ./",
+		"prettier:fix": "prettier --write --ignore-path .gitignore ./",
+		"prepare": "simple-git-hooks",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"simple-git-hooks": {
+		"pre-commit": "pnpm run prettier:fix"
+	},
+	"keywords": [],
+	"author": "Mikka (@cvyl)",
+	"license": "MIT",
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20240620.0",
+		"@types/node": "^20.14.8",
+		"esbuild": "^0.21.5",
+		"itty-router": "^5.0.17",
+		"lint-staged": "^15.2.7",
+		"render2": "^1.4.1",
+		"simple-git-hooks": "^2.11.1",
+		"typescript": "^5.5.2",
+		"wrangler": "^3.61.0"
+	},
+	"engines": {
+		"node": ">=18",
+		"npm": ">=8"
+	}
+}
