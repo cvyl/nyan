@@ -154,12 +154,22 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	}
 
 	try {
-		await env.R2_BUCKET.put(fileName, request.body, {
-			httpMetadata: {
-				contentType: contentType,
-				cacheControl: 'public, max-age=604800'
-			}
-		})
+		//if contenttype is a video add the /video/ prefix into r2
+		if (contentType.startsWith('video/')) {
+			await env.R2_BUCKET.put('video/' + fileName, request.body, {
+				httpMetadata: {
+					contentType: contentType,
+					cacheControl: 'public, max-age=604800'
+				}
+			})
+		} else {
+			await env.R2_BUCKET.put(fileName, request.body, {
+				httpMetadata: {
+					contentType: contentType,
+					cacheControl: 'public, max-age=604800'
+				}
+			})
+		}
 	} catch (error) {
 		console.error('Error uploading file:', error)
 		return new Response(
@@ -282,10 +292,14 @@ const getRawfile = async (
 		return new Response('Not Found', { status: 404 })
 	}
 	const url = new URL(request.url)
-	//check if the pathname has /raw/ or /video/ in it
 	if (url.pathname.includes('/video/')) {
-		const filename = url.pathname.split('/video/')[1]
-		const file = await env.R2_BUCKET.get(filename)
+		console.log('video')
+		const filename = url.pathname
+		
+
+		console.log(filename)
+		const file = await env.R2_BUCKET.get(filename.slice(1))
+		console.log(file)
 		if (!file) {
 			return new Response('Not Found', { status: 404 })
 		}
@@ -412,12 +426,10 @@ const getFile = async (
 router.get('/raw/:filename', getRawfile)
 router.get('/raw/:filename/json', getoEmbed)
 router.get('/upload/:filename', getFile)
-router.get('/*', getFile)
-router.head('/*', getFile)
-router.get('/**', getFile)
-router.head('/**', getFile)
-router.get('/video/*', getRawfile)
-router.head('/video/*', getRawfile)
+//router.get('/*', getFile)
+//router.head('/*', getFile)
+router.get('/video/:filename', getRawfile)
+//router.head('/video/:filename', getRawfile)
 router.get('/temp/*', getFile)
 router.head('/temp/*', getFile)
 
