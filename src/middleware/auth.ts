@@ -43,14 +43,12 @@ export const auth = async (request: IRequestStrict, env: Env) => {
 										url: `https://whatismyipaddress.com/ip/${ip}`
 									}
 								]
-								
 							}
 						]
 					})
 				}
 				await fetch(discordWebhookUrl, webhookPayload)
 			}
-
 
 			//console.error('Database error:', error);
 			//I mean it shouldn't error unless it's null
