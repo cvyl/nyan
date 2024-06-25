@@ -38,9 +38,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project
-        run: pnpm run build
-
       - name: Publish
         # only publish if a direct `push`/`repository_dispatch`
         uses: cloudflare/wrangler-action@2.0.0
