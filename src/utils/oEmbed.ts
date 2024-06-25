@@ -1,3 +1,5 @@
+import { oEmbedConfig, siteConfig } from "../config";
+
 export const getoEmbed = async (request: Request) => {
     const url = new URL(request.url);
 	const id = url.pathname.split('/raw/')[1];
@@ -23,8 +25,8 @@ export const getoEmbed = async (request: Request) => {
 		author_name: prefix + ' - ' + datestring,
 		author_url: url.href,
 
-		provider_name: 'Nyan.be - Anonymous Upload Service',
-		provider_url: 'https://nyan.be',
+		provider_name: oEmbedConfig.O_DEFAULT_PROVIDER_NAME,
+		provider_url: oEmbedConfig.O_PROVIDER_URL,
 	};
 
 	return new Response(JSON.stringify(oEmbedResponse), {

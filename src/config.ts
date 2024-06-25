@@ -19,12 +19,8 @@ export const openGraphConfig = {
 }
 
 export const oEmbedConfig = {
-	O_PROVIDER_NAME_PREFIX: 'PREFIX oE',
 	O_PROVIDER_URL: 'https://nyan.be',
-
-	O_DEFAULT_PROVIDER_NAME: 'this is unfilled',
-	O_DEFAULT_AUTHOR_NAME: 'this is unfilled',
-	O_DEFAULT_AUTHOR_URL: 'https://nyan.be'
+	O_DEFAULT_PROVIDER_NAME: 'Nyan.be - Anonymous Upload Service',
 }
 
 export const toggles = {
