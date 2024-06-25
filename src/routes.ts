@@ -15,6 +15,16 @@ import { getoEmbed } from './utils/oEmbed'
 type CF = [env: Env, ctx: ExecutionContext]
 const router = Router<IRequestStrict, CF>()
 
+/**
+ * TODO:
+ * - Add a way to delete files
+ * - Add a download button to the image page
+ * - Front page
+ * - Admin panel
+ * - KV Namespaces support for file metadata like what title, description, gradient, etc.
+ */
+
+
 router.get('/auth_test', auth, async (request, env) => {
 	return new Response(JSON.stringify({ success: true }), {
 		status: 200,
