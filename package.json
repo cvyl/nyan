@@ -8,7 +8,7 @@
 		"preview": "wrangler preview --watch",
 		"deploy": "wrangler deploy",
 		"prettier": "prettier --check --ignore-path .gitignore ./",
-		"prettier:fix": "prettier --write --ignore-path .gitignore ./",
+		"prettier:fix": "prettier --write --ignore-unknown --ignore-path .gitignore ./**",
 		"prepare": "simple-git-hooks",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
