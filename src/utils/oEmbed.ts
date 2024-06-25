@@ -1,7 +1,8 @@
 import { oEmbedConfig, siteConfig } from '../config'
 
 //todo add video oEmbed support
-//exmaple https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/286898202&width=480&height=360
+//example https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/286898202&width=480&height=360
+//https://video.twentythree.com/oembed?format=json&url=http%3a%2f%2fvideo%2etwentythree%2ecom%2fvideo%2dmarketing%2dminute%2db2b%2dvideo%2dmarketing%2dbest
 
 export const getoEmbed = async (request: Request) => {
 	const url = new URL(request.url)
