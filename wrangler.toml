@@ -1,0 +1,34 @@
+name = "nyan-worker"
+account_id = "54c7b733aa82d85bcf1e7cf752096f54"
+workers_dev = true
+routes = [
+	{pattern = "nyan.be/*", zone_name = "nyan.be"},
+	{pattern = "www.nyan.be/*", zone_name = "nyan.be"},
+	{pattern = "boymoder.org/*", zone_name = "boymoder.org"}
+]
+
+
+
+compatibility_date = "2022-10-31"
+compatibility_flags = ["nodejs_compat"]
+main = "./dist/index.mjs"
+
+[build]
+command = "pnpm run build"
+
+[[r2_buckets]]
+bucket_name = "sharex-files"
+preview_bucket_name = "sharex-files"
+binding = "R2_BUCKET"
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on   
+database_name = "nyan-db"
+database_id = "7d154794-45a5-4b85-a9a8-ee46a6ab91a5"
+
+[vars]
+# Change to the domain your Public Bucket is connected to.
+#CUSTOM_PUBLIC_BUCKET_DOMAIN = "custom-bucket.domain.tld"
+# Change to not let the worker serve files, only allowing traffic through the Public Bucket. Do not set if you have old links pointing to the worker.
+#ONLY_ALLOW_ACCESS_TO_PUBLIC_BUCKET = true
+
