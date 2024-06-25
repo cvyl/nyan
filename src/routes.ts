@@ -1,13 +1,7 @@
 import { IRequestStrict, Router } from 'itty-router'
 
 import { Env } from './types'
-import {
-	siteConfig,
-	loggerConfig,
-	openGraphConfig,
-	oEmbedConfig,
-	toggles
-} from './config'
+import { siteConfig, loggerConfig, openGraphConfig, toggles } from './config'
 import { auth } from './middleware/auth'
 import { getoEmbed } from './utils/oEmbed'
 
@@ -23,7 +17,6 @@ router.get('/auth_test', auth, async (request, env) => {
 
 router.get('/', async (request) => {
 	const url = new URL(request.url)
-	console.log(url.hostname)
 	if (
 		toggles.REDIRECT_OLD_URL === true &&
 		url.hostname === toggles.OLD_HOSTNAME
@@ -71,7 +64,6 @@ router.get('/', async (request) => {
 						})
 						.then(response => response.json())
 						.then(data => {
-							console.log(data);
 							if (data.success) {
 								var fileUrlInput = document.getElementById("fileUrl");
 								fileUrlInput.value = data.image;
@@ -117,7 +109,6 @@ router.get('/testpage', async (request: Request, env: Env) => {
 router.post('/upload', auth, async (request: Request, env: Env) => {
 	const url = new URL(request.url)
 	const filePrefix = request.headers.get('x-prefix') || ''
-	//token is grabbed so we can use it for the delete link and log it in the webhook
 	const token = request.headers.get('x-auth-key') || 'Anonymous'
 	const linkMask = request.headers.get('x-link-mask') || ''
 	const isFake = linkMask.length > 0
@@ -126,7 +117,6 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	if (!fileslug) {
 		fileslug = Math.floor(Date.now() / 1000).toString()
 	}
-	//const fileName = `${filePrefix}${fileslug}`
 	const fileName =
 		filePrefix.length > 0 ? `${filePrefix}_${fileslug}` : fileslug
 
@@ -185,8 +175,6 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN && !isFake) {
 		returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN
 		returnUrl.pathname = fileName
-
-		console.log('MD_COMPLETE: ' + MD_COMPLETE)
 	} else if (isFake) {
 		var MD_HTTPS = `[https://](<${returnUrl.href}>)`
 		var MD_EXPLOIT = `[${linkMask}](<${returnUrl.href}>) ||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​|| _ _ _ _ _ _ ${returnUrl.href} `
@@ -198,7 +186,6 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	const userAgent = request.headers.get('User-Agent') || 'Unknown'
 	const country = request.headers.get('cf-ipcountry') || 'Unknown'
 	const discordWebhookUrl = env.DISCORD_WEBHOOK_URL
-	console.log('Discord Webhook URL: ' + discordWebhookUrl)
 	if (discordWebhookUrl) {
 		const webhookRequest = {
 			method: 'POST',
@@ -253,7 +240,6 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 						],
 						footer: {
 							text: loggerConfig.L_FOOTER
-							//icon_url: loggerConfig.L_FOOTER_ICON
 						}
 					}
 				]
@@ -262,7 +248,6 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 		await fetch(discordWebhookUrl, webhookRequest)
 	}
 
-	console.log('MD_COMPLETE: ' + MD_COMPLETE)
 	// Return delete URL to the user
 	const deleteUrl = new URL(request.url)
 	deleteUrl.pathname = '/delete'
@@ -293,13 +278,9 @@ const getRawfile = async (
 	}
 	const url = new URL(request.url)
 	if (url.pathname.includes('/video/')) {
-		console.log('video')
 		const filename = url.pathname
-		
 
-		console.log(filename)
 		const file = await env.R2_BUCKET.get(filename.slice(1))
-		console.log(file)
 		if (!file) {
 			return new Response('Not Found', { status: 404 })
 		}
@@ -335,14 +316,12 @@ const getFile = async (
 	}
 	const url = new URL(request.url)
 	const id = url.pathname.slice(1)
-	console.log(id)
 
 	if (!id) {
 		return new Response('Not Found', { status: 404 })
 	}
 
 	const imageUrl = `https://nyan.be/raw/${id}`
-	console.log(id)
 
 	const file = await env.R2_BUCKET.get(id)
 	if (!file) {
@@ -356,35 +335,6 @@ const getFile = async (
 				'Content-Disposition': `attachment; filename="${id}"`
 			}
 		})
-	}
-	if (contentType.startsWith('video/')) {
-		return new Response(
-			`
-			<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<meta property="og:video" content="${imageUrl}" />
-				<meta name="twitter:card" content="summary_large_image">
-				<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
-				<meta property="og:type" content="video" />
-			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />  
-			</head>
-			<body>
-				<video controls autoplay loop>
-					<source src="${imageUrl}" type="${contentType}">
-					Your browser does not support the video tag.
-				</video>
-			</body>
-			</html>
-		`,
-			{
-				headers: {
-					'content-type': 'text/html'
-				}
-			}
-		)
 	}
 
 	if (contentType.startsWith('application/pdf')) {
