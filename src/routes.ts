@@ -192,7 +192,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 							},
 							{
 								name: 'File',
-								value: `${siteConfig.BASE_URL}/raw/${fileName}`,
+								value: returnUrl.href,
 								inline: true
 							},
 							{
@@ -216,7 +216,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 							}
 						],
 						image: {
-							url: returnUrl.href
+							url: `${siteConfig.BASE_URL}/raw/${fileName}`
 						},
 						footer: {
 							text: loggerConfig.L_FOOTER
