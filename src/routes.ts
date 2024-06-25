@@ -186,8 +186,9 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 
 	const ip = request.headers.get('cf-connecting-ip') || 'Unknown'
 	const userAgent = request.headers.get('User-Agent') || 'Unknown'
-	const referer = request.headers.get('Referer') || 'Unknown'
+	const country = request.headers.get('cf-ipcountry') || 'Unknown'
 	const discordWebhookUrl = env.DISCORD_WEBHOOK_URL
+	console.log('Discord Webhook URL: ' + discordWebhookUrl)
 	if (discordWebhookUrl) {
 		const webhookRequest = {
 			method: 'POST',
@@ -199,20 +200,14 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 				//avatar_url: loggerConfig.L_AVATAR_URL,
 				embeds: [
 					{
-						color: loggerConfig.L_EMBED_COLOR,
 						author: {
-							name: ip,
+							name: country + ' - ' + ip,
 							url: `https://whatismyipaddress.com/ip/${ip}`
 						},
 						fields: [
 							{
 								name: 'User-Agent',
-								value: userAgent,
-								inline: true
-							},
-							{
-								name: 'Referer',
-								value: referer,
+								value: `:flag_${country.toLowerCase()}: | ` + userAgent,
 								inline: true
 							},
 							{
@@ -227,7 +222,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 									' KB (' +
 									(Number.parseInt(contentLength) / 1024 / 1024).toFixed(2) +
 									' MB)',
-								inline: true
+								inline: false
 							},
 							{
 								name: 'Content-Type',
@@ -238,16 +233,11 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 								name: 'Link Mask',
 								value: linkMask?.length > 0 ? linkMask : 'None',
 								inline: true
-							},
-							{
-								name: 'File URL',
-								value: `[${fileName}](${returnUrl.href})`,
-								inline: true
 							}
 						],
 						footer: {
-							text: loggerConfig.L_FOOTER,
-							icon_url: loggerConfig.L_FOOTER_ICON
+							text: loggerConfig.L_FOOTER
+							//icon_url: loggerConfig.L_FOOTER_ICON
 						}
 					}
 				]
