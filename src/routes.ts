@@ -232,7 +232,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 		JSON.stringify({
 			success: true,
 			image: MD_COMPLETE.length > 1 ? MD_COMPLETE : returnUrl.href,
-			deleteUrl: 'Contact site webmistress for deletion.'
+			contact: 'Contact site webmistress for deletion.'
 		}),
 		{
 			headers: {
