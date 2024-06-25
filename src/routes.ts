@@ -168,12 +168,8 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	// Return the URL of the uploaded file
 	const returnUrl = new URL(request.url)
 	var MD_COMPLETE = ''
-	//Check if it is a video and if so prefix /video/ to the URL
-	if (contentType.startsWith('video/')) {
-		returnUrl.pathname = `/video/${fileName}`
-	} else {
-		returnUrl.pathname = `/${fileName}`
-	}
+	returnUrl.pathname = `/${fileName}`
+
 	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN && !isFake) {
 		returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN
 		returnUrl.pathname = fileName
@@ -275,18 +271,20 @@ const getRawfile = async (
 	ctx: ExecutionContext
 ) => {
 	if (env.ONLY_ALLOW_ACCESS_TO_PUBLIC_BUCKET) {
-		return new Response('Not Found', { status: 404 })
+		return new Response('Not Foun2', { status: 404 })
 	}
 	const url = new URL(request.url)
 	const filename = url.pathname.split('/raw/')[1]
+	console.log('filename: ' + filename)
 	const file = await env.R2_BUCKET.get(filename)
+	console.log('file: ' + file)
 	if (!file) {
 		return new Response('Not Found', { status: 404 })
 	}
 	return new Response(await file.arrayBuffer(), {
 		headers: {
 			'Content-Type': file.httpMetadata.contentType,
-			'Cache-Control': env.CACHE_CONTROL || 'public, max-age=604800'
+			'Cache-Control': 'public, max-age=604800'
 		}
 	})
 }
@@ -303,13 +301,13 @@ const getFile = async (
 	}
 	const url = new URL(request.url)
 	const id = url.pathname.slice(1)
-
+	console.log('id: ' + id)
 	if (!id) {
 		return new Response('Not Found', { status: 404 })
 	}
 
 	const imageUrl = `https://nyan.be/raw/${id}`
-
+	console.log('imageUrl: ' + imageUrl)
 	const file = await env.R2_BUCKET.get(id)
 	if (!file) {
 		return new Response('Not Found', { status: 404 })
@@ -326,7 +324,7 @@ const getFile = async (
 			})
 		}
 	}
-
+	file.uploaded
 	//serve content-type for special types
 	for (const type of specialTypes) {
 		if (contentType.startsWith(type)) {
@@ -339,26 +337,76 @@ const getFile = async (
 		}
 	}
 
+	const formattedDate = new Date(file.uploaded).toLocaleString()
+
 	return new Response(
 		`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <meta property="og:image" content="${imageUrl}" />
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<meta property="og:image" content="${imageUrl}" />
 			<meta name="twitter:card" content="summary_large_image">
-			<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}"> 
-			
+			<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
 			<meta property="og:type" content="website" />
-			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" /> 
-        </head>
-        <body>
-			<img src="${imageUrl}" alt="image" />
-        </body>
-		
-        </html>
-    `,
+			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
+			<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
+			<title>Nyan.be - Image Viewer</title>
+			<style>
+				@font-face {
+					font-family: "LXGW WenKai TC", cursive;
+  					font-weight: 400;
+  					font-style: normal;
+				}
+				body {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					height: 100vh;
+					margin: 0;
+					background: linear-gradient(135deg, #55CDFC, #F7A8B8);
+					font-family: 'LXGW WenKai TC', sans-serif;
+					color: white;
+					text-align: center;
+					position: relative;
+				}
+				.container {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+				}
+				img {
+					max-width: 90%;
+					max-height: 80vh;
+					border: 5px solid white;
+					border-radius: 10px;
+				}
+				.date {
+					margin-top: 20px;
+					font-size: 1.2em;
+				}
+				.branding {
+					position: absolute;
+					top: 20px;
+					left: 20px;
+					font-size: 1.5em;
+				}
+				a, a:hover, a:visited, a:active {
+  					color: inherit;
+  					text-decoration: none;
+ 				}
+			</style>
+		</head>
+		<body>
+			<div class="branding"><a href="https://nyan.be">nyan.be</a></div>
+			<div class="container">
+				<img src="${imageUrl}" alt="image" />
+				<div class="date">Uploaded on: ${formattedDate}</div>
+			</div>
+		</body>
+		</html>
+		`,
 		{
 			headers: {
 				'content-type': 'text/html'
@@ -372,10 +420,6 @@ router.get('/raw/:filename/json', getoEmbed)
 router.get('/upload/:filename', getFile)
 router.get('/*', getFile)
 router.head('/*', getFile)
-router.get('/video/:filename', getRawfile)
-//router.head('/video/:filename', getRawfile)
-router.get('/temp/*', getFile)
-router.head('/temp/*', getFile)
 
 router.all('/fake', () => {
 	return new Response('Not Found', { status: 404 })

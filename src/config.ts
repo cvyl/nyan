@@ -54,7 +54,11 @@ export const specialTypes = [
 	'application/json',
 	'text/xml',
 	'application/xml',
-	'image',
-	'video/',
-	'audio/'
+	'application/atom+xml',
+	'video/mp4',
+	'video/webm',
+	'video/ogg',
+	'video/quicktime',
+	'audio/',
+	'text/plain'
 ]
