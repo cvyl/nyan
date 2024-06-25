@@ -127,7 +127,8 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 		fileslug = Math.floor(Date.now() / 1000).toString()
 	}
 	//const fileName = `${filePrefix}${fileslug}`
-	const fileName = filePrefix.length > 0 ? `${filePrefix}_${fileslug}` : fileslug
+	const fileName =
+		filePrefix.length > 0 ? `${filePrefix}_${fileslug}` : fileslug
 
 	const contentType = request.headers.get('Content-Type')
 	const contentLength = request.headers.get('Content-Length')
@@ -163,16 +164,14 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN && !isFake) {
 		returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN
 		returnUrl.pathname = fileName
-		
-		console.log('MD_COMPLETE: ' + MD_COMPLETE)
 
+		console.log('MD_COMPLETE: ' + MD_COMPLETE)
 	} else if (isFake) {
 		var MD_HTTPS = `[https://](<${returnUrl.href}>)`
 		var MD_EXPLOIT = `[${linkMask}](<${returnUrl.href}>) ||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​|| _ _ _ _ _ _ ${returnUrl.href} `
 		MD_COMPLETE = MD_HTTPS + MD_EXPLOIT
 		returnUrl.href = MD_COMPLETE
 	}
-	
 
 	console.log('MD_COMPLETE: ' + MD_COMPLETE)
 	// Return delete URL to the user
@@ -180,7 +179,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	deleteUrl.pathname = '/delete'
 	deleteUrl.searchParams.set('file', fileName)
 	deleteUrl.searchParams.set('authkey', env.AUTH_KEY)
-	
+
 	return new Response(
 		JSON.stringify({
 			success: true,
@@ -219,21 +218,26 @@ const getRawfile = async (
 
 // Handle file retrieval for main page
 //todo: design the image page more :3
-const getFile = async (request: IRequestStrict, env: Env, ctx: ExecutionContext) => {
+const getFile = async (
+	request: IRequestStrict,
+	env: Env,
+	ctx: ExecutionContext
+) => {
 	if (env.ONLY_ALLOW_ACCESS_TO_PUBLIC_BUCKET) {
 		return new Response('Not Found', { status: 404 })
 	}
-	const url = new URL(request.url);
-	const id = url.pathname.slice(1);
-	console.log(id);
+	const url = new URL(request.url)
+	const id = url.pathname.slice(1)
+	console.log(id)
 
 	if (!id) {
-		return new Response('Not Found', { status: 404 });
+		return new Response('Not Found', { status: 404 })
 	}
 
-	const imageUrl = `https://nyan.be/raw/${id}`;
+	const imageUrl = `https://nyan.be/raw/${id}`
 	console.log(id)
-	return new Response(`
+	return new Response(
+		`
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -250,22 +254,24 @@ const getFile = async (request: IRequestStrict, env: Env, ctx: ExecutionContext)
             <img src="${imageUrl}" />
         </body>
         </html>
-    `, {
-		headers: {
-			'content-type': 'text/html',
-		},
-	});
-};
+    `,
+		{
+			headers: {
+				'content-type': 'text/html'
+			}
+		}
+	)
+}
 
 router.get('/raw/:filename', getRawfile)
 router.get('/raw/:filename/json', getoEmbed)
-router.get('/upload/:filename', getFile);
-router.get('/*', getFile);
-router.head('/*', getFile);
-router.get('/**', getFile);
-router.head('/**', getFile);
-router.get('/temp/*', getFile);
-router.head('/temp/*', getFile);
+router.get('/upload/:filename', getFile)
+router.get('/*', getFile)
+router.head('/*', getFile)
+router.get('/**', getFile)
+router.head('/**', getFile)
+router.get('/temp/*', getFile)
+router.head('/temp/*', getFile)
 
 router.all('/fake', () => {
 	return new Response('Not Found', { status: 404 })

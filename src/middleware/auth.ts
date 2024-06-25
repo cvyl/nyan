@@ -22,9 +22,9 @@ export const auth = async (request: IRequestStrict, env: Env) => {
 		} catch (error) {
 			//console.error('Database error:', error);
 			//I mean it shouldn't error unless it's null
-            //which means you are not putting in the correct key
+			//which means you are not putting in the correct key
 			//goofball :3c
-            return new Response(
+			return new Response(
 				JSON.stringify({ success: false, error: 'Unauthorized' }),
 				{ status: 403, headers: { 'Content-Type': 'application/json' } }
 			)
