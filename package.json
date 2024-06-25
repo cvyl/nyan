@@ -6,7 +6,7 @@
 		"dev": "wrangler dev",
 		"build": "esbuild src/index.ts --format=esm --platform=neutral --bundle --minify --sourcemap --main-fields=browser,module,main --outfile=dist/index.mjs",
 		"preview": "wrangler preview --watch",
-		"deploy": "wrangler deploy",
+		"deploy": "wrangler deploy --minify",
 		"prettier": "prettier --check --ignore-path .gitignore ./",
 		"prettier:fix": "prettier --write --ignore-unknown --ignore-path .gitignore ./**",
 		"prepare": "simple-git-hooks",
