@@ -282,6 +282,20 @@ const getRawfile = async (
 		return new Response('Not Found', { status: 404 })
 	}
 	const url = new URL(request.url)
+	//check if the pathname has /raw/ or /video/ in it
+	if (url.pathname.includes('/video/')) {
+		const filename = url.pathname.split('/video/')[1]
+		const file = await env.R2_BUCKET.get(filename)
+		if (!file) {
+			return new Response('Not Found', { status: 404 })
+		}
+		return new Response(await file.arrayBuffer(), {
+			headers: {
+				'Content-Type': file.httpMetadata.contentType,
+				'Cache-Control': env.CACHE_CONTROL || 'public, max-age=604800'
+			}
+		})
+	}
 	const filename = url.pathname.split('/raw/')[1]
 	const file = await env.R2_BUCKET.get(filename)
 	if (!file) {
@@ -402,6 +416,8 @@ router.get('/*', getFile)
 router.head('/*', getFile)
 router.get('/**', getFile)
 router.head('/**', getFile)
+router.get('/video/*', getRawfile)
+router.head('/video/*', getRawfile)
 router.get('/temp/*', getFile)
 router.head('/temp/*', getFile)
 
