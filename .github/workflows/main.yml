@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --recursive
 
       - name: Publish
         # only publish if a direct `push`/`repository_dispatch`
