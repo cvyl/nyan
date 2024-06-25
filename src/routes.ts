@@ -315,7 +315,7 @@ const getFile = async (
 		return new Response('Not Found', { status: 404 })
 	}
 	const contentType = file.httpMetadata.contentType
-	if (!contentType.startsWith('image/') || !contentType.startsWith('video/')) {
+	if (!contentType.startsWith('image/') && !contentType.startsWith('video/')) {
 		return new Response(await file.arrayBuffer(), {
 			headers: {
 				'Content-Type': contentType,
