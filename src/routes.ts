@@ -331,7 +331,7 @@ const getFile = async (
 		return new Response('Not Found', { status: 404 })
 	}
 	const contentType = file.httpMetadata.contentType
-	if (!contentType.startsWith('image/') && !contentType.startsWith('video/')) {
+	if (!contentType.startsWith('image/')) {
 		return new Response(await file.arrayBuffer(), {
 			headers: {
 				'Content-Type': contentType,
@@ -379,8 +379,8 @@ const getFile = async (
 router.get('/raw/:filename', getRawfile)
 router.get('/raw/:filename/json', getoEmbed)
 router.get('/upload/:filename', getFile)
-//router.get('/*', getFile)
-//router.head('/*', getFile)
+router.get('/*', getFile)
+router.head('/*', getFile)
 router.get('/video/:filename', getRawfile)
 //router.head('/video/:filename', getRawfile)
 router.get('/temp/*', getFile)
