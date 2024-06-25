@@ -184,6 +184,73 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 		returnUrl.href = MD_COMPLETE
 	}
 
+	const ip = request.headers.get('cf-connecting-ip') || 'Unknown'
+	const userAgent = request.headers.get('User-Agent') || 'Unknown'
+	const referer = request.headers.get('Referer') || 'Unknown'
+	const discordWebhookUrl = env.DISCORD_WEBHOOK_URL
+	if(discordWebhookUrl) {
+		const webhookRequest = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				username: loggerConfig.L_USERNAME,
+				//avatar_url: loggerConfig.L_AVATAR_URL,
+				embeds: [{
+					color: loggerConfig.L_EMBED_COLOR,
+					author: {
+						name: ip,
+						url: `https://whatismyipaddress.com/ip/${ip}`
+					},
+					fields: [
+						{
+							name: 'User-Agent',
+							value: userAgent,
+							inline: true
+						},
+						{
+							name: 'Referer',
+							value: referer,
+							inline: true
+						},
+						{
+							name: 'File',
+							value: returnUrl.href,
+							inline: true
+						},
+						{
+							name: 'Size',
+							value: (Number.parseInt(contentLength) / 1024).toFixed(2) + ' KB (' + (Number.parseInt(contentLength) / 1024 / 1024).toFixed(2) + ' MB)',
+							inline: true
+						},
+						{
+							name: 'Content-Type',
+							value: contentType,
+							inline: true
+						},
+						{
+							name: 'Link Mask',
+							value: linkMask?.length > 0 ? linkMask : 'None',
+							inline: true
+						},
+						{
+							name: 'File URL',
+							value: `[${fileName}](${returnUrl.href})`,
+							inline: true
+						}
+					],
+					footer: {
+						text: loggerConfig.L_FOOTER,
+						icon_url: loggerConfig.L_FOOTER_ICON
+					},
+				}]
+			})
+	}
+	await fetch(discordWebhookUrl, webhookRequest)
+	}
+
+
 	console.log('MD_COMPLETE: ' + MD_COMPLETE)
 	// Return delete URL to the user
 	const deleteUrl = new URL(request.url)

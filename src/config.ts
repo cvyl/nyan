@@ -9,7 +9,8 @@ export const loggerConfig = {
 	L_FOOTER: 'Nyan.be - Anonymous Upload Service',
 	L_FOOTER_ICON: 'https://boymoder.org/favicon.ico',
 	L_FOOTER_URL: 'https://boymoder.org',
-	L_EMBED_COLOR: '#7289DA'
+	L_EMBED_COLOR: '#7289DA',
+	L_USERNAME: 'Nyan.be - Upload Logs'
 }
 
 export const openGraphConfig = {
