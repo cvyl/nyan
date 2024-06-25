@@ -1,0 +1,32 @@
+name = "nyan-worker"
+account_id = "account_id"
+workers_dev = true
+routes = [
+	{pattern = "example.tld/*", zone_name = "example.tld"},
+]
+
+
+
+compatibility_date = "2022-10-31"
+compatibility_flags = ["nodejs_compat"]
+main = "./dist/index.mjs"
+
+[build]
+command = "pnpm run build"
+
+[[r2_buckets]]
+bucket_name = "bucket_name"
+preview_bucket_name = "bucket_name"
+binding = "bucket_binding"
+
+[[d1_databases]]
+binding = "database_binding" # i.e. available in your Worker on   
+database_name = "db_name"
+database_id = "database_id"
+
+[vars]
+# Change to the domain your Public Bucket is connected to.
+#CUSTOM_PUBLIC_BUCKET_DOMAIN = "custom-bucket.domain.tld"
+# Change to not let the worker serve files, only allowing traffic through the Public Bucket. Do not set if you have old links pointing to the worker.
+#ONLY_ALLOW_ACCESS_TO_PUBLIC_BUCKET = true
+
