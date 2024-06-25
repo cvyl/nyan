@@ -245,17 +245,11 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 		await fetch(discordWebhookUrl, webhookRequest)
 	}
 
-	// Return delete URL to the user
-	const deleteUrl = new URL(request.url)
-	deleteUrl.pathname = '/delete'
-	deleteUrl.searchParams.set('file', fileName)
-	deleteUrl.searchParams.set('authkey', token)
-
 	return new Response(
 		JSON.stringify({
 			success: true,
 			image: MD_COMPLETE.length > 1 ? MD_COMPLETE : returnUrl.href,
-			deleteUrl: deleteUrl.href
+			deleteUrl: "Contact site webmistress for deletion."
 		}),
 		{
 			headers: {
