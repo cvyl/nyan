@@ -144,7 +144,6 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	}
 
 	try {
-		//if contenttype is a video add the /video/ prefix into r2
 		if (contentType.startsWith('video/')) {
 			await env.R2_BUCKET.put('video/' + fileName, request.body, {
 				httpMetadata: {
@@ -171,7 +170,12 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	// Return the URL of the uploaded file
 	const returnUrl = new URL(request.url)
 	var MD_COMPLETE = ''
-	returnUrl.pathname = `/${fileName}`
+	//Check if it is a video and if so prefix /video/ to the URL
+	if (contentType.startsWith('video/')) {
+		returnUrl.pathname = `/video/${fileName}`
+	} else {
+		returnUrl.pathname = `/${fileName}`
+	}
 	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN && !isFake) {
 		returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN
 		returnUrl.pathname = fileName
@@ -194,7 +198,6 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 			},
 			body: JSON.stringify({
 				username: loggerConfig.L_USERNAME,
-				//avatar_url: loggerConfig.L_AVATAR_URL,
 				embeds: [
 					{
 						color: loggerConfig.L_EMBED_COLOR,
@@ -253,6 +256,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	deleteUrl.pathname = '/delete'
 	deleteUrl.searchParams.set('file', fileName)
 	deleteUrl.searchParams.set('authkey', token)
+
 
 	return new Response(
 		JSON.stringify({
