@@ -257,7 +257,6 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	deleteUrl.searchParams.set('file', fileName)
 	deleteUrl.searchParams.set('authkey', token)
 
-
 	return new Response(
 		JSON.stringify({
 			success: true,
