@@ -215,6 +215,9 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 								inline: true
 							}
 						],
+						image: {
+							url: returnUrl.href
+						},
 						footer: {
 							text: loggerConfig.L_FOOTER
 						}
