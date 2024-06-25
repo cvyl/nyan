@@ -24,7 +24,6 @@ const router = Router<IRequestStrict, CF>()
  * - KV Namespaces support for file metadata like what title, description, gradient, etc.
  */
 
-
 router.get('/auth_test', auth, async (request, env) => {
 	return new Response(JSON.stringify({ success: true }), {
 		status: 200,
