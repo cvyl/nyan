@@ -132,6 +132,17 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 
 	const contentType = request.headers.get('Content-Type')
 	const contentLength = request.headers.get('Content-Length')
+	const maxSize = 100 * 1024 * 1024 // 100 MB
+	if (Number.parseInt(contentLength) > maxSize) {
+		return new Response(
+			JSON.stringify({
+				success: false,
+				error: 'File size too large'
+			}),
+			{ status: 400, headers: { 'Content-Type': 'application/json' } }
+		)
+	}
+
 	if (!contentType || !contentLength) {
 		return new Response(
 			JSON.stringify({
