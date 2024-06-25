@@ -323,6 +323,35 @@ const getFile = async (
 			}
 		})
 	}
+	if (contentType.startsWith('video/')) {
+		return new Response(
+			`
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+				<meta property="og:video" content="${imageUrl}" />
+				<meta name="twitter:card" content="summary_large_image">
+				<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
+				<meta property="og:type" content="video" />
+			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />  
+			</head>
+			<body>
+				<video controls autoplay loop>
+					<source src="${imageUrl}" type="${contentType}">
+					Your browser does not support the video tag.
+				</video>
+			</body>
+			</html>
+		`,
+			{
+				headers: {
+					'content-type': 'text/html'
+				}
+			}
+		)
+	}
 
 	if (contentType.startsWith('application/pdf')) {
 		return new Response(await file.arrayBuffer(), {
