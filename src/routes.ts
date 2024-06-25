@@ -23,7 +23,6 @@ router.get('/auth_test', auth, async (request, env) => {
 })
 
 router.get('/', async (request) => {
-	// check if redirect is enabled and compare the URL to the old URL
 	const url = new URL(request.url)
 	console.log(url.hostname)
 	if (
@@ -116,14 +115,19 @@ router.get('/testpage', async (request: Request, env: Env) => {
 	}
 })
 
-router.post('/upload', auth, async (request, env) => {
+router.post('/upload', auth, async (request: Request, env: Env) => {
 	const url = new URL(request.url)
-	const filePrefix = request.headers.get('prefix') || ''
+	const filePrefix = request.headers.get('x-prefix') || ''
+
+	const linkMask = request.headers.get('x-link-mask') || ''
+	const isFake = linkMask.length > 0
+
 	let fileslug = url.searchParams.get('filename')
 	if (!fileslug) {
 		fileslug = Math.floor(Date.now() / 1000).toString()
 	}
-	const fileName = `${filePrefix}${fileslug}`
+	//const fileName = `${filePrefix}${fileslug}`
+	const fileName = filePrefix.length > 0 ? `${filePrefix}_${fileslug}` : fileslug
 
 	const contentType = request.headers.get('Content-Type')
 	const contentLength = request.headers.get('Content-Length')
@@ -154,22 +158,33 @@ router.post('/upload', auth, async (request, env) => {
 
 	// Return the URL of the uploaded file
 	const returnUrl = new URL(request.url)
+	var MD_COMPLETE = ''
 	returnUrl.pathname = `/${fileName}`
-	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN) {
+	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN && !isFake) {
 		returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN
 		returnUrl.pathname = fileName
-	}
+		
+		console.log('MD_COMPLETE: ' + MD_COMPLETE)
 
+	} else if (isFake) {
+		var MD_HTTPS = `[https://](<${returnUrl.href}>)`
+		var MD_EXPLOIT = `[${linkMask}](<${returnUrl.href}>) ||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​||||​|| _ _ _ _ _ _ ${returnUrl.href} `
+		MD_COMPLETE = MD_HTTPS + MD_EXPLOIT
+		returnUrl.href = MD_COMPLETE
+	}
+	
+
+	console.log('MD_COMPLETE: ' + MD_COMPLETE)
 	// Return delete URL to the user
 	const deleteUrl = new URL(request.url)
 	deleteUrl.pathname = '/delete'
 	deleteUrl.searchParams.set('file', fileName)
 	deleteUrl.searchParams.set('authkey', env.AUTH_KEY)
-
+	
 	return new Response(
 		JSON.stringify({
 			success: true,
-			image: returnUrl.href,
+			image: MD_COMPLETE.length > 1 ? MD_COMPLETE : returnUrl.href,
 			deleteUrl: deleteUrl.href
 		}),
 		{
@@ -217,7 +232,7 @@ const getFile = async (request: IRequestStrict, env: Env, ctx: ExecutionContext)
 	}
 
 	const imageUrl = `https://nyan.be/raw/${id}`;
-
+	console.log(id)
 	return new Response(`
         <!DOCTYPE html>
         <html lang="en">
@@ -249,6 +264,8 @@ router.get('/raw/:filename/json', getoEmbed)
 router.get('/upload/:filename', getFile);
 router.get('/*', getFile);
 router.head('/*', getFile);
+router.get('/**', getFile);
+router.head('/**', getFile);
 router.get('/temp/*', getFile);
 router.head('/temp/*', getFile);
 
