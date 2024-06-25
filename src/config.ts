@@ -32,3 +32,27 @@ export const toggles = {
 	OLD_URL: 'https://boymoder.org',
 	OLD_HOSTNAME: 'boymoder.org'
 }
+
+export const disallowedTypes = [
+	'application/x-msdownload',
+	'application/x-ms-installer',
+	'application/x-msdos-program',
+	'application/x-msi',
+	'application/x-msdos-windows',
+	'application/xhtml+xml',
+	'text/html',
+	'application/x-httpd-php',
+	'application/x-php',
+	'application/x-rar-compressed',
+	'application/x-tar',
+	'application/x-7z-compressed',
+	'application/zip',
+]
+
+export const specialTypes = [
+	'application/pdf',
+	'application/json',
+	'text/xml',
+	'application/xml',
+	'image/svg+xml',
+]

@@ -1,7 +1,7 @@
 import { IRequestStrict, Router } from 'itty-router'
 
 import { Env } from './types'
-import { siteConfig, loggerConfig, openGraphConfig, toggles } from './config'
+import { siteConfig, loggerConfig, openGraphConfig, toggles, disallowedTypes, specialTypes } from './config'
 import { auth } from './middleware/auth'
 import { getoEmbed } from './utils/oEmbed'
 
@@ -331,21 +331,28 @@ const getFile = async (
 		return new Response('Not Found', { status: 404 })
 	}
 	const contentType = file.httpMetadata.contentType
-	if (!contentType.startsWith('image/')) {
-		return new Response(await file.arrayBuffer(), {
-			headers: {
-				'Content-Type': contentType,
-				'Content-Disposition': `attachment; filename="${id}"`
-			}
-		})
+
+	for (const type of disallowedTypes) {
+		if (contentType.startsWith(type)) {
+			return new Response(await file.arrayBuffer(), {
+				headers: {
+					'Content-Type': contentType,
+					'Content-Disposition': `attachment; filename="${id}"`
+				}
+			});
+		}
 	}
 
-	if (contentType.startsWith('application/pdf')) {
-		return new Response(await file.arrayBuffer(), {
-			headers: {
-				'Content-Type': contentType
-			}
-		})
+	//serve content-type for special types
+	for (const type of specialTypes) {
+		if (contentType.startsWith(type)) {
+			return new Response(await file.arrayBuffer(), {
+				headers: {
+					'Content-Type': contentType,
+					'Cache-Control': env.CACHE_CONTROL || 'public, max-age=604800'
+				}
+			})
+		}
 	}
 
 	return new Response(
