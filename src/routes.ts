@@ -192,7 +192,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 							},
 							{
 								name: 'File',
-								value: returnUrl.href,
+								value: `${siteConfig.BASE_URL}/raw/${fileName}`,
 								inline: true
 							},
 							{
