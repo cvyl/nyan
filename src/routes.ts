@@ -118,7 +118,8 @@ router.get('/testpage', async (request: Request, env: Env) => {
 router.post('/upload', auth, async (request: Request, env: Env) => {
 	const url = new URL(request.url)
 	const filePrefix = request.headers.get('x-prefix') || ''
-
+	//token is grabbed so we can use it for the delete link and log it in the webhook
+	const token = request.headers.get('x-auth-key') || 'Anonymous'
 	const linkMask = request.headers.get('x-link-mask') || ''
 	const isFake = linkMask.length > 0
 
@@ -200,6 +201,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 				//avatar_url: loggerConfig.L_AVATAR_URL,
 				embeds: [
 					{
+						color: loggerConfig.L_EMBED_COLOR,
 						author: {
 							name: country + ' - ' + ip,
 							url: `https://whatismyipaddress.com/ip/${ip}`
@@ -208,6 +210,11 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 							{
 								name: 'User-Agent',
 								value: `:flag_${country.toLowerCase()}: | ` + userAgent,
+								inline: true
+							},
+							{
+								name: 'Authorization',
+								value: '||' + token + '||',
 								inline: true
 							},
 							{
@@ -222,7 +229,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 									' KB (' +
 									(Number.parseInt(contentLength) / 1024 / 1024).toFixed(2) +
 									' MB)',
-								inline: false
+								inline: true
 							},
 							{
 								name: 'Content-Type',
@@ -251,7 +258,7 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	const deleteUrl = new URL(request.url)
 	deleteUrl.pathname = '/delete'
 	deleteUrl.searchParams.set('file', fileName)
-	deleteUrl.searchParams.set('authkey', env.AUTH_KEY)
+	deleteUrl.searchParams.set('authkey', token)
 
 	return new Response(
 		JSON.stringify({
