@@ -2,7 +2,7 @@ export const siteConfig = {
 	BASE_URL: 'https://nyan.be',
 	TITLE: 'Nyan.be',
 	DESCRIPTION: 'Nyan.be is an anonymous upload service.',
-	DEFAULT_EMBED_COLOR: '#000000'
+	DEFAULT_EMBED_COLOR: '#7289DA'
 }
 
 export const loggerConfig = {
