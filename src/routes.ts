@@ -93,26 +93,6 @@ router.get('/', async (request) => {
 	)
 })
 
-router.get('/testpage', async (request: Request, env: Env) => {
-	try {
-		const stmt = env.DB.prepare('SELECT * FROM User')
-		const rows = await stmt.all()
-		return new Response(JSON.stringify(rows), {
-			status: 200,
-			headers: { 'Content-Type': 'application/json' }
-		})
-	} catch (error) {
-		console.error('Error fetching data from database:', error)
-		return new Response(
-			JSON.stringify({ success: false, error: error.message }),
-			{
-				status: 500,
-				headers: { 'Content-Type': 'application/json' }
-			}
-		)
-	}
-})
-
 router.post('/upload', auth, async (request: Request, env: Env) => {
 	const url = new URL(request.url)
 	const filePrefix = request.headers.get('x-prefix') || ''
@@ -269,9 +249,7 @@ const getRawfile = async (
 	}
 	const url = new URL(request.url)
 	const filename = url.pathname.split('/raw/')[1]
-	console.log('filename: ' + filename)
 	const file = await env.R2_BUCKET.get(filename)
-	console.log('file: ' + file)
 	if (!file) {
 		return new Response('Not Found', { status: 404 })
 	}
@@ -295,13 +273,11 @@ const getFile = async (
 	}
 	const url = new URL(request.url)
 	const id = url.pathname.slice(1)
-	console.log('id: ' + id)
 	if (!id) {
 		return new Response('Not Found', { status: 404 })
 	}
 
 	const imageUrl = `https://nyan.be/raw/${id}`
-	console.log('imageUrl: ' + imageUrl)
 	const file = await env.R2_BUCKET.get(id)
 	if (!file) {
 		return new Response('Not Found', { status: 404 })
