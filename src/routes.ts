@@ -324,18 +324,6 @@ const getFile = async (
 		})
 	}
 
-	if (
-		contentType.startsWith('application/') &&
-		!contentType.startsWith('application/pdf')
-	) {
-		return new Response(await file.arrayBuffer(), {
-			headers: {
-				'Content-Type': contentType,
-				'Content-Disposition': `attachment; filename="${id}"`
-			}
-		})
-	}
-
 	if (contentType.startsWith('application/pdf')) {
 		return new Response(await file.arrayBuffer(), {
 			headers: {
