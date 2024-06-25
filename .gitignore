@@ -11,6 +11,7 @@ node_modules/
 .env
 .mf
 .wrangler
+wrangler.toml
 dev.sql
 prisma/migrations/
 wrangler.toml
