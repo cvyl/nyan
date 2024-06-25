@@ -1,5 +1,4 @@
 import { IRequestStrict, Router } from 'itty-router'
-import render2 from 'render2'
 
 import { Env } from './types'
 import {

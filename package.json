@@ -13,7 +13,8 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"simple-git-hooks": {
-		"pre-commit": "pnpm run prettier:fix"
+		"pre-commit": "pnpm run prettier:fix",
+		"pre-push": "pnpm run deploy"
 	},
 	"keywords": [],
 	"author": "Mikka (@cvyl)",
@@ -24,7 +25,6 @@
 		"esbuild": "^0.21.5",
 		"itty-router": "^5.0.17",
 		"lint-staged": "^15.2.7",
-		"render2": "^1.4.1",
 		"simple-git-hooks": "^2.11.1",
 		"typescript": "^5.5.2",
 		"wrangler": "^3.61.0"
