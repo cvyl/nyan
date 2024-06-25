@@ -19,7 +19,7 @@ export const getoEmbed = async (request: Request) => {
 	}
 	console.log('oEmbed ID: ' + id);
 	const oEmbedResponse = {
-		title: datestring,
+		//title: datestring,
 		author_name: prefix + ' - ' + datestring,
 		author_url: url.href,
 

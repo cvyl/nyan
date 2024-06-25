@@ -245,8 +245,6 @@ const getFile = async (request: IRequestStrict, env: Env, ctx: ExecutionContext)
 			
 			<meta property="og:type" content="website" />
 			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" /> 
-			
-            <title>v1 boymoder.org</title>
         </head>
         <body>
             <img src="${imageUrl}" />
