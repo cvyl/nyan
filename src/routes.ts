@@ -1,7 +1,14 @@
 import { IRequestStrict, Router } from 'itty-router'
 
 import { Env } from './types'
-import { siteConfig, loggerConfig, openGraphConfig, toggles, disallowedTypes, specialTypes } from './config'
+import {
+	siteConfig,
+	loggerConfig,
+	openGraphConfig,
+	toggles,
+	disallowedTypes,
+	specialTypes
+} from './config'
 import { auth } from './middleware/auth'
 import { getoEmbed } from './utils/oEmbed'
 
@@ -339,7 +346,7 @@ const getFile = async (
 					'Content-Type': contentType,
 					'Content-Disposition': `attachment; filename="${id}"`
 				}
-			});
+			})
 		}
 	}
 

@@ -46,7 +46,7 @@ export const disallowedTypes = [
 	'application/x-rar-compressed',
 	'application/x-tar',
 	'application/x-7z-compressed',
-	'application/zip',
+	'application/zip'
 ]
 
 export const specialTypes = [
@@ -54,5 +54,5 @@ export const specialTypes = [
 	'application/json',
 	'text/xml',
 	'application/xml',
-	'image/svg+xml',
+	'image/svg+xml'
 ]
