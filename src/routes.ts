@@ -247,6 +247,41 @@ const getFile = async (
 
 	const imageUrl = `https://nyan.be/raw/${id}`
 	console.log(id)
+
+	const file = await env.R2_BUCKET.get(id)
+	if (!file) {
+		return new Response('Not Found', { status: 404 })
+	}
+	const contentType = file.httpMetadata.contentType
+	if (!contentType.startsWith('image/') || !contentType.startsWith('video/')) {
+		return new Response(await file.arrayBuffer(), {
+			headers: {
+				'Content-Type': contentType,
+				'Content-Disposition': `attachment; filename="${id}"`
+			}
+		})
+	}
+
+	if (
+		contentType.startsWith('application/') &&
+		!contentType.startsWith('application/pdf')
+	) {
+		return new Response(await file.arrayBuffer(), {
+			headers: {
+				'Content-Type': contentType,
+				'Content-Disposition': `attachment; filename="${id}"`
+			}
+		})
+	}
+
+	if (contentType.startsWith('application/pdf')) {
+		return new Response(await file.arrayBuffer(), {
+			headers: {
+				'Content-Type': contentType
+			}
+		})
+	}
+
 	return new Response(
 		`
         <!DOCTYPE html>
@@ -262,8 +297,9 @@ const getFile = async (
 			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" /> 
         </head>
         <body>
-            <img src="${imageUrl}" />
+			<img src="${imageUrl}" alt="image" />
         </body>
+		
         </html>
     `,
 		{
