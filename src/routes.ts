@@ -151,21 +151,12 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	}
 
 	try {
-		if (contentType.startsWith('video/')) {
-			await env.R2_BUCKET.put('video/' + fileName, request.body, {
-				httpMetadata: {
-					contentType: contentType,
-					cacheControl: 'public, max-age=604800'
-				}
-			})
-		} else {
-			await env.R2_BUCKET.put(fileName, request.body, {
-				httpMetadata: {
-					contentType: contentType,
-					cacheControl: 'public, max-age=604800'
-				}
-			})
-		}
+		await env.R2_BUCKET.put(fileName, request.body, {
+			httpMetadata: {
+				contentType: contentType,
+				cacheControl: 'public, max-age=604800'
+			}
+		})
 	} catch (error) {
 		console.error('Error uploading file:', error)
 		return new Response(
@@ -287,20 +278,6 @@ const getRawfile = async (
 		return new Response('Not Found', { status: 404 })
 	}
 	const url = new URL(request.url)
-	if (url.pathname.includes('/video/')) {
-		const filename = url.pathname
-
-		const file = await env.R2_BUCKET.get(filename.slice(1))
-		if (!file) {
-			return new Response('Not Found', { status: 404 })
-		}
-		return new Response(await file.arrayBuffer(), {
-			headers: {
-				'Content-Type': file.httpMetadata.contentType,
-				'Cache-Control': env.CACHE_CONTROL || 'public, max-age=604800'
-			}
-		})
-	}
 	const filename = url.pathname.split('/raw/')[1]
 	const file = await env.R2_BUCKET.get(filename)
 	if (!file) {
