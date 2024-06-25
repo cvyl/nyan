@@ -23,7 +23,7 @@ export const getoEmbed = async (request: Request) => {
 	const oEmbedResponse = {
 		//title: datestring,
 		author_name: prefix + ' - ' + datestring,
-		author_url: url.href,
+		author_url: siteConfig.BASE_URL + '/' + id,
 
 		provider_name: oEmbedConfig.O_DEFAULT_PROVIDER_NAME,
 		provider_url: oEmbedConfig.O_PROVIDER_URL,
