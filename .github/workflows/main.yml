@@ -44,7 +44,7 @@ jobs:
         if: github.event_name == 'repository_dispatch' || github.event_name == 'push'
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          workingDirectory: ./node_modules/
+          packageManager: pnpm
           command: deploy
 
         env:
