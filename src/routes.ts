@@ -57,8 +57,7 @@ router.post('/anonUpload', async (request: Request, env: Env) => {
 
 // Authenticated upload route
 router.post('/upload', auth, async (request: Request, env: Env) => {
-	const userAgent = request.headers.get('User-Agent')
-	if (!userAgent || !userAgent.includes('ShareX')) {
+	if (!request.headers.get('User-Agent').includes('ShareX')) {
 		return createJSONResponse(400, false, 'Invalid User-Agent')
 	}
 	const url = new URL(request.url)
