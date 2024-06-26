@@ -11,7 +11,7 @@ export const homePage = `
         <meta property="og:description" content="Free Anonymous File Hosting" />
         <title>Nyan.be - Free Anonymous File Hosting</title>
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="theme-color" content="#fff9f3">
+        <meta name="theme-color" content="#d98c5e">
         <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://nyan.be/raw/home.css">
         <style>
@@ -86,7 +86,7 @@ export const rulesPage = `
         <meta property="og:description" content="The rules and privacy policy" />
         <title>Nyan.be - Rules & Privacy Policy</title>
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="theme-color" content="#fff9f3">
+        <meta name="theme-color" content="#d98c5e">
         <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://nyan.be/raw/home.css">
         <style>
