@@ -1,7 +1,7 @@
-import { router } from ".."
-import { auth } from "../../middleware/auth"
-import { Env } from "../../types"
-import { returnJSON } from "../../utils/webhook"
+import { router } from '..'
+import { auth } from '../../middleware/auth'
+import { Env } from '../../types'
+import { returnJSON } from '../../utils/webhook'
 
 router.post('/anonUpload', async (request: Request, env: Env) => {
 	let fileslug = Math.floor(Date.now() / 1000).toString()
