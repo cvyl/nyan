@@ -9,7 +9,6 @@ export const homePage = `
         <link rel="icon" href="https://nyan.be/raw/1719439218" type="image/x-icon" />
         <meta property="og:title" content="Nyan.be" />
         <meta property="og:description" content="Free Anonymous File Hosting" />
-        <meta property="og:image" content="https://nyan.be/raw/1719438473" />
         <title>Nyan.be - Free Anonymous File Hosting</title>
         <meta name="twitter:card" content="summary_large_image">
         <meta name="theme-color" content="#fff9f3">
@@ -85,7 +84,6 @@ export const rulesPage = `
         <link rel="icon" href="https://nyan.be/raw/1719439218" type="image/x-icon" />
         <meta property="og:title" content="Nyan.be" />
         <meta property="og:description" content="The rules and privacy policy" />
-        <meta property="og:image" content="https://nyan.be/raw/1719438473" />
         <title>Nyan.be - Rules & Privacy Policy</title>
         <meta name="twitter:card" content="summary_large_image">
         <meta name="theme-color" content="#fff9f3">
