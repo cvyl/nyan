@@ -178,7 +178,7 @@ export const videoPlayer = (
             <meta property="og:video:url" content="${imageUrl}">
             <meta property="og:video:type" content="${contentType}" />
             <meta property="og:video:height" content="720">
-            <meta property="og:video:width" content="960">
+            <meta property="og:video:width" content="1280">
             <link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
             <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
             <link rel="stylesheet" href="https://nyan.be/raw/styles.css">
