@@ -227,6 +227,9 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 						image: {
 							url: `${siteConfig.BASE_URL}/raw/${fileName}`
 						},
+						video: {
+							url: `${siteConfig.BASE_URL}/raw/${fileName}`
+						},
 						footer: {
 							text: loggerConfig.L_FOOTER
 						}
@@ -262,8 +265,30 @@ const getRawfile = async (
 	const url = new URL(request.url)
 	const filename = url.pathname.split('/raw/')[1]
 	const file = await env.R2_BUCKET.get(filename)
+	const contentType = file.httpMetadata.contentType
 	if (!file) {
 		return new Response('Not Found', { status: 404 })
+	}
+	for (const type of disallowedTypes) {
+		if (contentType.startsWith(type)) {
+			return new Response(await file.arrayBuffer(), {
+				headers: {
+					'Content-Type': contentType,
+					'Content-Disposition': `attachment; filename="${filename}"`
+				}
+			})
+		}
+	}
+	//serve content-type for special types
+	for (const type of specialTypes) {
+		if (contentType.startsWith(type)) {
+			return new Response(await file.arrayBuffer(), {
+				headers: {
+					'Content-Type': contentType,
+					'Cache-Control': env.CACHE_CONTROL || 'public, max-age=604800'
+				}
+			})
+		}
 	}
 	return new Response(await file.arrayBuffer(), {
 		headers: {
@@ -306,7 +331,6 @@ const getFile = async (
 			})
 		}
 	}
-	file.uploaded
 	//serve content-type for special types
 	for (const type of specialTypes) {
 		if (contentType.startsWith(type)) {
@@ -318,6 +342,47 @@ const getFile = async (
 			})
 		}
 	}
+	//if content type is video, response is html with video and opengraph meta tags
+	if (contentType.startsWith('video/')) {
+		return new Response(
+			`
+			<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+				<meta name="twitter:card" content="summary_large_image">
+				<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
+				${ /*<meta property="og:image" content="https://nyan.be/raw/Mikka_1719393039"> */''}
+				<meta property="og:type" content="video.other">
+				<meta property="og:video:url" content="${imageUrl}">
+				<meta property="og:video:type" content="${contentType}" />
+				<meta property="og:video:height" content="720">
+				<meta property="og:video:width" content="960">
+				<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
+				<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
+				<link rel="stylesheet" href="https://nyan.be/raw/styles.css">
+				<title>Nyan.be - Video Viewer</title>
+			</head>
+			<body>
+				<div class="branding"><a href="https://nyan.be">nyan.be</a></div>
+				<div class="container">
+					<video controls>
+						<source src="${imageUrl}" type="${contentType}">
+						Your browser does not support the video tag.
+					</video>
+				</div>
+			</body>
+			</html>
+			`,
+			{
+				headers: {
+					'content-type': 'text/html'
+				}
+			}
+		)
+	}
+	
 
 	const formattedDate = new Date(file.uploaded).toLocaleString()
 
@@ -331,9 +396,9 @@ const getFile = async (
 			<meta property="og:image" content="${imageUrl}" />
 			<meta name="twitter:card" content="summary_large_image">
 			<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
-			<meta property="og:type" content="website" />
 			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
 			<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
+			<link rel="stylesheet" href="https://nyan.be/raw/styles.css">
 			<title>Nyan.be - Image Viewer</title>
 			<style>
 				@font-face {

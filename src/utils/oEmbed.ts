@@ -33,8 +33,16 @@ export const getoEmbed = async (request: Request) => {
 		author_url: siteConfig.BASE_URL + '/' + id,
 
 		provider_name: oEmbedConfig.O_DEFAULT_PROVIDER_NAME,
-		provider_url: oEmbedConfig.O_PROVIDER_URL
-	}
+		provider_url: oEmbedConfig.O_PROVIDER_URL,
+
+		//oEmbed video html iframe
+		/*type: 'video',
+		version: '1.0',
+		height: 720,
+		width: 960,
+		html: `<iframe src="${siteConfig.BASE_URL}/raw/${timestamp}" width="100%" height="100%" frameborder="0" scrolling="no" allowfullscreen></iframe>`,
+		*/
+		}
 
 	return new Response(JSON.stringify(oEmbedResponse), {
 		headers: {
