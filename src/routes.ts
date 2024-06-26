@@ -11,6 +11,7 @@ import {
 } from './config'
 import { auth } from './middleware/auth'
 import { getoEmbed } from './utils/oEmbed'
+import { returnJSON } from './utils/webhook'
 
 type CF = [env: Env, ctx: ExecutionContext]
 const router = Router<IRequestStrict, CF>()
@@ -22,6 +23,8 @@ const router = Router<IRequestStrict, CF>()
  * - Front page
  * - Admin panel
  * - KV Namespaces support for file metadata like what title, description, gradient, etc.
+ * - Add a way to view the file metadata
+ * - move html to utils/html.ts and exports
  */
 
 router.get('/auth_test', auth, async (request, env) => {
@@ -50,55 +53,135 @@ router.get('/', async (request) => {
 				<meta property="og:title" content="test" />
 				<meta property="og:image" content="https://nyan.be/raw/1719009115" />
 				<title>v1 boymoder new site in rework, dont use</title>
+				<meta name="twitter:card" content="summary_large_image">
+				<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
+				${/*<meta property="og:image" content="https://nyan.be/raw/Mikka_1719393039"> */ ''}
+				<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
+				<link rel="stylesheet" href="https://nyan.be/raw/home.css">
 			</head>
 			<body>
-				<h1>hello world</h1>
-				<p>test</p>
-				<br />
-				<br />
-    			<input type="file" id="fileInput" />
-    			<button id="uploadButton">Upload</button>
-    			<br />
-    			<input type="text" id="fileUrl" readonly style="width: 100%; display: none;" />
-			</body>
-			<script>
-				document.getElementById("uploadButton").addEventListener("click", function() {
-					var fileInput = document.getElementById("fileInput");
-					var file = fileInput.files[0];
+				<header>
+					<h1>Upload Your File</h1>
+				</header>
+				<main>
+					<input type="file" id="fileInput" />
+					<button id="uploadButton">Upload</button>
+					<input type="text" id="fileUrl" readonly />
+				</main>
+				<script>
+					document.getElementById("uploadButton").addEventListener("click", function() {
+						var fileInput = document.getElementById("fileInput");
+						var file = fileInput.files[0];
 
-					if (file) {
-						var formData = new FormData();
-						formData.append("file", file);
+						if (file) {
+							var formData = new FormData();
+							formData.append("file", file);
 
-						fetch("/anonUpload", {
-							method: "POST",
-							headers: {
-								"Content-Type": file.type,
-								"Content-Length": file.size
-							},
-							body: file
-						})
-						.then(response => response.json())
-						.then(data => {
-							if (data.success) {
-								var fileUrlInput = document.getElementById("fileUrl");
-								fileUrlInput.value = data.image;
-								fileUrlInput.style.display = "block";
-							}
-						})
-						.catch(error => {
-							console.error(error);
-						});
-					} else {
-						alert("Please select a file to upload.");
-					}
-				});
-			</script>
+							fetch("/anonUpload", {
+								method: "POST",
+								headers: {
+									"Content-Type": file.type,
+									"Content-Length": file.size
+								},
+								body: file
+							})
+							.then(response => response.json())
+							.then(data => {
+								if (data.success) {
+									var fileUrlInput = document.getElementById("fileUrl");
+									fileUrlInput.value = data.image;
+									fileUrlInput.style.display = "block";
+								}
+							})
+							.catch(error => {
+								console.error(error);
+							});
+						} else {
+							alert("Please select a file to upload.");
+						}
+					});
+				</script>
+    		</body>
         </html>
 		`,
 		{
 			headers: { 'Content-Type': 'text/html' }
 		}
+	)
+})
+
+router.post('/anonUpload', async (request: Request, env: Env) => {
+	let fileslug = Math.floor(Date.now() / 1000).toString()
+	const filename = `${fileslug}`
+	const contentType = request.headers.get('Content-Type')
+	const contentLength = request.headers.get('Content-Length')
+	const maxSize = 100 * 1024 * 1024 // 100 MB
+	if (!contentType || !contentLength) {
+		return new Response(
+			JSON.stringify({
+				success: false,
+				error: 'Content-Type or Content-Length header missing'
+			}),
+			{ status: 400, headers: { 'Content-Type': 'application/json' } }
+		)
+	} else if (Number.parseInt(contentLength) > maxSize) {
+		return new Response(
+			JSON.stringify({
+				success: false,
+				error: 'File size too large'
+			}),
+			{ status: 400, headers: { 'Content-Type': 'application/json' } }
+		)
+	}
+	try {
+		await env.R2_BUCKET.put(filename, request.body, {
+			httpMetadata: {
+				contentType: contentType,
+				cacheControl: 'public, max-age=604800'
+			}
+		})
+	} catch (error) {
+		return new Response(
+			JSON.stringify({
+				success: false,
+				error: 'Internal Server Error'
+			}),
+			{ status: 500, headers: { 'Content-Type': 'application/json' } }
+		)
+	}
+	const returnUrl = new URL(request.url)
+	returnUrl.pathname = `/${filename}`
+	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN) {
+		returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN
+		returnUrl.pathname = filename
+	}
+	const ip = request.headers.get('cf-connecting-ip') || 'Unknown'
+	const userAgent = request.headers.get('User-Agent') || 'Unknown'
+	const country = request.headers.get('cf-ipcountry') || 'Unknown'
+	const token = 'Anonymous Web Upload'
+	const linkMask = ''
+	const discordWebhookUrl = env.DISCORD_WEBHOOK_URL
+
+	const webhookRequest = returnJSON(
+		country,
+		ip,
+		userAgent,
+		token,
+		returnUrl,
+		contentLength,
+		contentType,
+		linkMask,
+		filename
+	)
+
+	await fetch(discordWebhookUrl, webhookRequest)
+	return new Response(
+		JSON.stringify({
+			success: true,
+			image: returnUrl.href,
+			contact: 'Contact site webmistress for deletion.'
+		}),
+		{ headers: { 'Content-Type': 'application/json' } }
 	)
 })
 
@@ -173,72 +256,20 @@ router.post('/upload', auth, async (request: Request, env: Env) => {
 	const userAgent = request.headers.get('User-Agent') || 'Unknown'
 	const country = request.headers.get('cf-ipcountry') || 'Unknown'
 	const discordWebhookUrl = env.DISCORD_WEBHOOK_URL
-	if (discordWebhookUrl) {
-		const webhookRequest = {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				username: loggerConfig.L_USERNAME,
-				embeds: [
-					{
-						color: loggerConfig.L_EMBED_COLOR,
-						author: {
-							name: country + ' - ' + ip,
-							url: `https://whatismyipaddress.com/ip/${ip}`
-						},
-						fields: [
-							{
-								name: 'User-Agent',
-								value: `:flag_${country.toLowerCase()}: | ` + userAgent,
-								inline: true
-							},
-							{
-								name: 'Authorization',
-								value: '||' + token + '||',
-								inline: true
-							},
-							{
-								name: 'File',
-								value: returnUrl.href,
-								inline: true
-							},
-							{
-								name: 'Size',
-								value:
-									(Number.parseInt(contentLength) / 1024).toFixed(2) +
-									' KB (' +
-									(Number.parseInt(contentLength) / 1024 / 1024).toFixed(2) +
-									' MB)',
-								inline: true
-							},
-							{
-								name: 'Content-Type',
-								value: contentType,
-								inline: true
-							},
-							{
-								name: 'Link Mask',
-								value: linkMask?.length > 0 ? linkMask : 'None',
-								inline: true
-							}
-						],
-						image: {
-							url: `${siteConfig.BASE_URL}/raw/${fileName}`
-						},
-						video: {
-							url: `${siteConfig.BASE_URL}/raw/${fileName}`
-						},
-						footer: {
-							text: loggerConfig.L_FOOTER
-						}
-					}
-				]
-			})
-		}
-		await fetch(discordWebhookUrl, webhookRequest)
-	}
+
+	const webhookRequest = returnJSON(
+		country,
+		ip,
+		userAgent,
+		token,
+		returnUrl,
+		contentLength,
+		contentType,
+		linkMask,
+		fileName
+	)
+
+	await fetch(discordWebhookUrl, webhookRequest)
 
 	return new Response(
 		JSON.stringify({
