@@ -12,7 +12,7 @@ export const homePage = `
         <meta property="og:image" content="https://nyan.be/raw/1719438473" />
         <title>Nyan.be - Free Anonymous File Hosting</title>
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
+        <meta name="theme-color" content="#fff9f3">
         <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://nyan.be/raw/home.css">
         <style>
@@ -88,7 +88,7 @@ export const rulesPage = `
         <meta property="og:image" content="https://nyan.be/raw/1719438473" />
         <title>Nyan.be - Rules & Privacy Policy</title>
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
+        <meta name="theme-color" content="#fff9f3">
         <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://nyan.be/raw/home.css">
         <style>
