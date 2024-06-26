@@ -12,6 +12,7 @@ import {
 import { auth } from './middleware/auth'
 import { getoEmbed } from './utils/oEmbed'
 import { returnJSON } from './utils/webhook'
+import { homePage, imageViewer, videoPlayer } from './utils/html'
 
 type CF = [env: Env, ctx: ExecutionContext]
 const router = Router<IRequestStrict, CF>()
@@ -42,72 +43,9 @@ router.get('/', async (request) => {
 	) {
 		return Response.redirect(siteConfig.BASE_URL, 301)
 	}
-	return new Response(
-		`
-		<!DOCTYPE html>
-        <html>
-			<head>
-				<meta charset="UTF-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<link rel="icon" href="https://nyan.be/raw/1719009115" type="image/x-icon" />
-				<meta property="og:title" content="test" />
-				<meta property="og:image" content="https://nyan.be/raw/1719009115" />
-				<title>v1 boymoder new site in rework, dont use</title>
-				<meta name="twitter:card" content="summary_large_image">
-				<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
-				${/*<meta property="og:image" content="https://nyan.be/raw/Mikka_1719393039"> */ ''}
-				<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
-				<link rel="stylesheet" href="https://nyan.be/raw/home.css">
-			</head>
-			<body>
-				<header>
-					<h1>Upload Your File</h1>
-				</header>
-				<main>
-					<input type="file" id="fileInput" />
-					<button id="uploadButton">Upload</button>
-					<input type="text" id="fileUrl" readonly />
-				</main>
-				<script>
-					document.getElementById("uploadButton").addEventListener("click", function() {
-						var fileInput = document.getElementById("fileInput");
-						var file = fileInput.files[0];
-
-						if (file) {
-							var formData = new FormData();
-							formData.append("file", file);
-
-							fetch("/anonUpload", {
-								method: "POST",
-								headers: {
-									"Content-Type": file.type,
-									"Content-Length": file.size
-								},
-								body: file
-							})
-							.then(response => response.json())
-							.then(data => {
-								if (data.success) {
-									var fileUrlInput = document.getElementById("fileUrl");
-									fileUrlInput.value = data.image;
-									fileUrlInput.style.display = "block";
-								}
-							})
-							.catch(error => {
-								console.error(error);
-							});
-						} else {
-							alert("Please select a file to upload.");
-						}
-					});
-				</script>
-    		</body>
-        </html>
-		`,
-		{
-			headers: { 'Content-Type': 'text/html' }
-		}
-	)
+	return new Response(homePage, {
+		headers: { 'Content-Type': 'text/html' }
+	})
 })
 
 router.post('/anonUpload', async (request: Request, env: Env) => {
@@ -351,6 +289,7 @@ const getFile = async (
 		return new Response('Not Found', { status: 404 })
 	}
 	const contentType = file.httpMetadata.contentType
+	const formattedDate = new Date(file.uploaded).toLocaleString()
 
 	for (const type of disallowedTypes) {
 		if (contentType.startsWith(type)) {
@@ -373,123 +312,17 @@ const getFile = async (
 			})
 		}
 	}
-	//if content type is video, response is html with video and opengraph meta tags
+
 	if (contentType.startsWith('video/')) {
-		return new Response(
-			`
-			<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<meta name="twitter:card" content="summary_large_image">
-				<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
-				${/*<meta property="og:image" content="https://nyan.be/raw/Mikka_1719393039"> */ ''}
-				<meta property="og:type" content="video.other">
-				<meta property="og:video:url" content="${imageUrl}">
-				<meta property="og:video:type" content="${contentType}" />
-				<meta property="og:video:height" content="720">
-				<meta property="og:video:width" content="960">
-				<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
-				<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
-				<link rel="stylesheet" href="https://nyan.be/raw/styles.css">
-				<title>Nyan.be - Video Viewer</title>
-			</head>
-			<body>
-				<div class="branding"><a href="https://nyan.be">nyan.be</a></div>
-				<div class="container">
-					<video controls>
-						<source src="${imageUrl}" type="${contentType}">
-						Your browser does not support the video tag.
-					</video>
-				</div>
-			</body>
-			</html>
-			`,
-			{
-				headers: {
-					'content-type': 'text/html'
-				}
-			}
-		)
+		return new Response(videoPlayer(imageUrl, contentType, id, formattedDate), {
+			headers: { 'Content-Type': 'text/html' }
+		})
 	}
 
-	const formattedDate = new Date(file.uploaded).toLocaleString()
-
-	return new Response(
-		`
-		<!DOCTYPE html>
-		<html lang="en">
-		<head>
-			<meta charset="UTF-8" />
-			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-			<meta property="og:image" content="${imageUrl}" />
-			<meta name="twitter:card" content="summary_large_image">
-			<meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
-			<link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
-			<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
-			<link rel="stylesheet" href="https://nyan.be/raw/styles.css">
-			<title>Nyan.be - Image Viewer</title>
-			<style>
-				@font-face {
-					font-family: "LXGW WenKai TC", cursive;
-  					font-weight: 400;
-  					font-style: normal;
-				}
-				body {
-					display: flex;
-					justify-content: center;
-					align-items: center;
-					height: 100vh;
-					margin: 0;
-					background: linear-gradient(135deg, #55CDFC, #F7A8B8);
-					font-family: 'LXGW WenKai TC', sans-serif;
-					color: white;
-					text-align: center;
-					position: relative;
-				}
-				.container {
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-				}
-				img {
-					max-width: 90%;
-					max-height: 80vh;
-					border: 5px solid white;
-					border-radius: 10px;
-				}
-				.date {
-					margin-top: 20px;
-					font-size: 1.2em;
-				}
-				.branding {
-					position: absolute;
-					top: 20px;
-					left: 20px;
-					font-size: 1.5em;
-				}
-				a, a:hover, a:visited, a:active {
-  					color: inherit;
-  					text-decoration: none;
- 				}
-			</style>
-		</head>
-		<body>
-			<div class="branding"><a href="https://nyan.be">nyan.be</a></div>
-			<div class="container">
-				<img src="${imageUrl}" alt="image" />
-				<div class="date">Uploaded on: ${formattedDate}</div>
-			</div>
-		</body>
-		</html>
-		`,
-		{
-			headers: {
-				'content-type': 'text/html'
-			}
-		}
-	)
+	imageViewer(imageUrl, id, formattedDate)
+	return new Response(imageViewer(imageUrl, id, formattedDate), {
+		headers: { 'Content-Type': 'text/html' }
+	})
 }
 
 router.get('/raw/:filename', getRawfile)
