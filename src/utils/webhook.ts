@@ -1,15 +1,19 @@
 import { loggerConfig, siteConfig } from '../config'
 
 // Utility function to create a JSON response
-export const createJSONResponse = (status: number, success: boolean, error: string | null = null, data: Record<string, unknown> = {}) => {
-    const responseBody: Record<string, unknown> = { success, ...data };
-    if (error) responseBody.error = error;
-    return new Response(JSON.stringify(responseBody), {
-        status,
-        headers: { 'Content-Type': 'application/json' },
-    });
-};
-
+export const createJSONResponse = (
+	status: number,
+	success: boolean,
+	error: string | null = null,
+	data: Record<string, unknown> = {}
+) => {
+	const responseBody: Record<string, unknown> = { success, ...data }
+	if (error) responseBody.error = error
+	return new Response(JSON.stringify(responseBody), {
+		status,
+		headers: { 'Content-Type': 'application/json' }
+	})
+}
 
 // Return JSON function taking arguments
 export const returnJSON = (

@@ -1,8 +1,8 @@
-import { IRequestStrict } from "itty-router/types"
-import { Env } from "../types"
-import { disallowedTypes, siteConfig, specialTypes } from "../config"
-import { videoPlayer, imageViewer } from "./html"
-import { createJSONResponse, returnJSON } from "./webhook"
+import { IRequestStrict } from 'itty-router/types'
+import { Env } from '../types'
+import { disallowedTypes, siteConfig, specialTypes } from '../config'
+import { videoPlayer, imageViewer } from './html'
+import { createJSONResponse, returnJSON } from './webhook'
 
 export const getRawfile = async (
 	request: IRequestStrict,
@@ -108,63 +108,82 @@ export const getFile = async (
 
 // Function to check file size and content type
 const checkFile = (request: Request): Response | null => {
-    const contentType = request.headers.get('Content-Type');
-    const contentLength = request.headers.get('Content-Length');
+	const contentType = request.headers.get('Content-Type')
+	const contentLength = request.headers.get('Content-Length')
 
-    if (!contentType || !contentLength) {
-        return createJSONResponse(400, false, 'Content-Type or Content-Length header missing');
-    }
+	if (!contentType || !contentLength) {
+		return createJSONResponse(
+			400,
+			false,
+			'Content-Type or Content-Length header missing'
+		)
+	}
 
-    if (Number.parseInt(contentLength, 10) > siteConfig.MAX_FILE_SIZE) {
-        return createJSONResponse(413, false, 'File size too large');
-    }
-    return null;
+	if (Number.parseInt(contentLength, 10) > siteConfig.MAX_FILE_SIZE) {
+		return createJSONResponse(413, false, 'File size too large')
+	}
+	return null
 }
 
 // Common function to handle file uploads
-export const handleFileUpload = async (request: Request, env: Env, fileName: string, isAnonymous: boolean, linkMask: string, prefix: string): Promise<Response> => {
-    var filePath = `${fileName}`;
-	if(isAnonymous === true) {
-		filePath = `${fileName}`;
+export const handleFileUpload = async (
+	request: Request,
+	env: Env,
+	fileName: string,
+	isAnonymous: boolean,
+	linkMask: string,
+	prefix: string
+): Promise<Response> => {
+	var filePath = `${fileName}`
+	if (isAnonymous === true) {
+		filePath = `${fileName}`
 	} else if (prefix.length > 0 && !isAnonymous) {
-		filePath = `${prefix}_${fileName}`;
+		filePath = `${prefix}_${fileName}`
 	}
-    const errorResponse = checkFile(request);
-    if (errorResponse) return errorResponse;
+	const errorResponse = checkFile(request)
+	if (errorResponse) return errorResponse
 
-    try {
-        await env.R2_BUCKET.put(filePath, request.body, {
+	try {
+		await env.R2_BUCKET.put(filePath, request.body, {
 			httpMetadata: {
 				contentType: request.headers.get('Content-Type') || '',
-				cacheControl: 'public, max-age=604800',
-			},
-		});
-    } catch (error) {
-        console.error('Error uploading file:', error);
-        return createJSONResponse(500, false, 'Internal Server Error');
-    }
+				cacheControl: 'public, max-age=604800'
+			}
+		})
+	} catch (error) {
+		console.error('Error uploading file:', error)
+		return createJSONResponse(500, false, 'Internal Server Error')
+	}
 
-    const returnUrl = new URL(request.url);
-    returnUrl.pathname = `/${filePath}`;
-    let imageURL = returnUrl.href;
+	const returnUrl = new URL(request.url)
+	returnUrl.pathname = `/${filePath}`
+	let imageURL = returnUrl.href
 
-    if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN && !linkMask) {
-        returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN;
-        imageURL = returnUrl.href;
-    } else if (linkMask) {
-        imageURL = `[${linkMask}](<${returnUrl.href}>)`;
-    }
+	if (env.CUSTOM_PUBLIC_BUCKET_DOMAIN && !linkMask) {
+		returnUrl.host = env.CUSTOM_PUBLIC_BUCKET_DOMAIN
+		imageURL = returnUrl.href
+	} else if (linkMask) {
+		imageURL = `[${linkMask}](<${returnUrl.href}>)`
+	}
 
-    await fetch(env.DISCORD_WEBHOOK_URL, returnJSON(
-            request.headers.get('cf-ipcountry') || 'Unknown',
-            request.headers.get('cf-connecting-ip') || 'Unknown',
-            request.headers.get('User-Agent') || 'Unknown',
-            isAnonymous ? 'Anonymous Web Upload' : request.headers.get('x-auth-key') || 'Anonymous',
-            new URL(imageURL),
-            request.headers.get('Content-Length') || '0',
-            request.headers.get('Content-Type') || '',
-            linkMask,
-            fileName
-        ))
-    return createJSONResponse(200, true, null, { image: imageURL, contact: 'Contact site webmistress for deletion.' });
-};
+	await fetch(
+		env.DISCORD_WEBHOOK_URL,
+		returnJSON(
+			request.headers.get('cf-ipcountry') || 'Unknown',
+			request.headers.get('cf-connecting-ip') || 'Unknown',
+			request.headers.get('User-Agent') || 'Unknown',
+			isAnonymous
+				? 'Anonymous Web Upload'
+				: request.headers.get('x-auth-key') || 'Anonymous',
+			new URL(imageURL),
+			request.headers.get('Content-Length') || '0',
+			request.headers.get('Content-Type') || '',
+			linkMask,
+			fileName
+		)
+	)
+	return createJSONResponse(200, true, null, {
+		image: imageURL,
+		contact: 'Contact site webmistress for deletion.'
+	})
+}

@@ -29,8 +29,6 @@ const router = Router<IRequestStrict, CF>()
  * - move html to utils/html.ts and exports
  */
 
-
-
 router.get('/auth_test', auth, async (request, env) => {
 	return new Response(JSON.stringify({ success: true }), {
 		status: 200,
@@ -53,20 +51,19 @@ router.get('/', async (request) => {
 
 // Anonymous upload route
 router.post('/anonUpload', async (request: Request, env: Env) => {
-    const fileName = Math.floor(Date.now() / 1000).toString();
-    return handleFileUpload(request, env, fileName, true, '', '');
-});
+	const fileName = Math.floor(Date.now() / 1000).toString()
+	return handleFileUpload(request, env, fileName, true, '', '')
+})
 
 // Authenticated upload route
 router.post('/upload', auth, async (request: Request, env: Env) => {
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get('filename') || Math.floor(Date.now() / 1000).toString();
-    const linkMask = request.headers.get('x-link-mask') || '';
-	const prefix = request.headers.get('x-prefix') || '';
-    return handleFileUpload(request, env, fileName, false, linkMask, prefix);
-});
-
-
+	const url = new URL(request.url)
+	const fileName =
+		url.searchParams.get('filename') || Math.floor(Date.now() / 1000).toString()
+	const linkMask = request.headers.get('x-link-mask') || ''
+	const prefix = request.headers.get('x-prefix') || ''
+	return handleFileUpload(request, env, fileName, false, linkMask, prefix)
+})
 
 router.get('/raw/:filename', getRawfile)
 router.get('/raw/:filename/json', getoEmbed)
