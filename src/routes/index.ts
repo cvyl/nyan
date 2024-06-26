@@ -55,7 +55,4 @@ router.get('/upload/:filename', getFile)
 router.get('/*', getFile)
 router.head('/*', getFile)
 
-router.all('/fake', () => {
-	return new Response('Not Found', { status: 404 })
-})
 export { router }
