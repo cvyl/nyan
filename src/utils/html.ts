@@ -131,7 +131,7 @@ export const rulesPage = `
 
 export const imageViewer = (
 	imageUrl: string,
-    contentType: string,
+	contentType: string,
 	id: string,
 	formattedDate: string
 ) => {
