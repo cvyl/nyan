@@ -167,6 +167,7 @@ export const mediaViewer = (
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="twitter:card" content="summary_large_image">
         <meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
+        <link rel="icon" href="https://nyan.be/raw/1719439218" type="image/x-icon" />
         <link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
         <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://nyan.be/raw/styles.css">

@@ -12,7 +12,7 @@ import {
 import { auth } from './middleware/auth'
 import { getoEmbed } from './utils/oEmbed'
 import { createJSONResponse, returnJSON } from './utils/webhook'
-import { homePage, imageViewer, rulesPage, videoPlayer } from './utils/html'
+import { homePage, rulesPage } from './utils/html'
 import { getFile, getRawfile, handleFileUpload } from './utils/files'
 
 type CF = [env: Env, ctx: ExecutionContext]
