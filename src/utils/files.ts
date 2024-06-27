@@ -10,7 +10,7 @@ export const getRawfile = async (
 	ctx: ExecutionContext
 ) => {
 	if (env.ONLY_ALLOW_ACCESS_TO_PUBLIC_BUCKET) {
-		return new Response('Not Foun2', { status: 404 })
+		return new Response('Not Found', { status: 404 })
 	}
 	const url = new URL(request.url)
 	const filename = url.pathname.split('/raw/')[1]
@@ -49,7 +49,6 @@ export const getRawfile = async (
 }
 
 // Handle file retrieval for main page
-//todo: design the image page more :3
 export const getFile = async (
 	request: IRequestStrict,
 	env: Env,
