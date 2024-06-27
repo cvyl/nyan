@@ -38,7 +38,7 @@ export const homePage = `
         <h1>Upload Your Files</h1><span>Free Anonymous File Hosting | 100 MB File Limit</span>
     </header>
     <main>
-        <input type="file" id="fileInput" multiple />
+        <input type="file" id="fileInput" />
         <button id="uploadButton">Upload</button>
         <div id="fileUrls" style="display: block;"></div>
     </main>
