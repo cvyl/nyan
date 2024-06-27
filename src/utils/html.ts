@@ -173,12 +173,9 @@ export const videoPlayer = (
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <meta name="twitter:card" content="summary_large_image">
             <meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
-            ${/*<meta property="og:image" content="https://nyan.be/raw/Mikka_1719393039"> */ ''}
             <meta property="og:type" content="video.other">
             <meta property="og:video:url" content="${imageUrl}">
             <meta property="og:video:type" content="${contentType}" />
-            <meta property="og:video:height" content="720">
-            <meta property="og:video:width" content="1280">
             <link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
             <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
             <link rel="stylesheet" href="https://nyan.be/raw/styles.css">
