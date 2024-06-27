@@ -131,6 +131,7 @@ export const rulesPage = `
 
 export const imageViewer = (
 	imageUrl: string,
+    contentType: string,
 	id: string,
 	formattedDate: string
 ) => {
@@ -141,6 +142,7 @@ export const imageViewer = (
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <meta property="og:image" content="${imageUrl}" />
+            <meta property="og:image:type" content="${contentType}" />
             <meta name="twitter:card" content="summary_large_image">
             <meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
             <link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />

@@ -100,8 +100,8 @@ export const getFile = async (
 		})
 	}
 
-	imageViewer(imageUrl, id, formattedDate)
-	return new Response(imageViewer(imageUrl, id, formattedDate), {
+	//imageViewer(imageUrl, id, formattedDate)
+	return new Response(imageViewer(imageUrl, contentType, id, formattedDate), {
 		headers: { 'Content-Type': 'text/html' }
 	})
 }
