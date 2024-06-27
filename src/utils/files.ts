@@ -94,7 +94,6 @@ export const getFile = async (
 		}
 	}
 
-
 	return new Response(mediaViewer(imageUrl, contentType, id, formattedDate), {
 		headers: { 'Content-Type': 'text/html' }
 	})

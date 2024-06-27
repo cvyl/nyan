@@ -134,32 +134,32 @@ export const mediaViewer = (
 	id: string,
 	formattedDate: string
 ) => {
-    const isImage = contentType.startsWith("image/");
-    const isVideo = contentType.startsWith("video/");
-  
-    const headTags = isImage
-      ? `
+	const isImage = contentType.startsWith('image/')
+	const isVideo = contentType.startsWith('video/')
+
+	const headTags = isImage
+		? `
         <meta property="og:image" content="${url}" />
         <meta property="og:image:type" content="${contentType}" />
         <title>${siteConfig.TITLE} - Image Viewer</title>
       `
-      : `
+		: `
         <meta property="og:type" content="video.other">
         <meta property="og:video:url" content="${url}">
         <meta property="og:video:type" content="${contentType}" />
         <title>${siteConfig.TITLE} - Video Viewer</title>
-      `;
-  
-    const bodyContent = isImage
-      ? `<img src="${url}" alt="image" />`
-      : `
+      `
+
+	const bodyContent = isImage
+		? `<img src="${url}" alt="image" />`
+		: `
         <video controls>
           <source src="${url}" type="${contentType}">
           Your browser does not support the video tag.
         </video>
-      `;
-  
-    return `
+      `
+
+	return `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -180,5 +180,5 @@ export const mediaViewer = (
         </div>
       </body>
       </html>
-    `;
+    `
 }
