@@ -1,19 +1,25 @@
 import { siteConfig } from '../config'
 
-export const homePage = `
-<!DOCTYPE html>
-<html>
-    <head>
+const defaultHeadTags = `
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="https://nyan.be/raw/1719439218" type="image/x-icon" />
-        <meta property="og:title" content="Nyan.be" />
-        <meta property="og:description" content="Free Anonymous File Hosting" />
-        <title>Nyan.be - Free Anonymous File Hosting</title>
         <meta name="twitter:card" content="summary_large_image">
         <meta name="theme-color" content="#d98c5e">
         <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://nyan.be/raw/home.css">
+        <meta property="og:title" content="${siteConfig.TITLE}" />
+
+`
+
+export const homePage = `
+<!DOCTYPE html>
+<html>
+    <head>
+        ${defaultHeadTags}
+        <meta property="og:description" content="${siteConfig.DESCRIPTION}" />
+        <title>${siteConfig.TITLE} - ${siteConfig.DESCRIPTION}</title>
+
         <style>
             a,
             a:hover,
@@ -79,16 +85,9 @@ export const rulesPage = `
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="https://nyan.be/raw/1719439218" type="image/x-icon" />
-        <meta property="og:title" content="Nyan.be" />
+        ${defaultHeadTags}
         <meta property="og:description" content="The rules and privacy policy" />
-        <title>Nyan.be - Rules & Privacy Policy</title>
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="theme-color" content="#d98c5e">
-        <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://nyan.be/raw/home.css">
+        <title>${siteConfig.TITLE} - Rules & Privacy Policy</title>
         <style>
             a,
             a:hover,
@@ -128,71 +127,58 @@ export const rulesPage = `
     </body>
 </html>
 `
-
-export const imageViewer = (
-	imageUrl: string,
+//todo add GIF support
+export const mediaViewer = (
+	url: string,
 	contentType: string,
 	id: string,
 	formattedDate: string
 ) => {
-	return `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <meta property="og:image" content="${imageUrl}" />
-            <meta property="og:image:type" content="${contentType}" />
-            <meta name="twitter:card" content="summary_large_image">
-            <meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
-            <link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
-            <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
-            <link rel="stylesheet" href="https://nyan.be/raw/styles.css">
-            <title>Nyan.be - Image Viewer</title>
-        </head>
-        <body>
-            <div class="branding"><a href="https://nyan.be">nyan.be</a></div>
-            <div class="container">
-                <img src="${imageUrl}" alt="image" />
-                <div class="date">Uploaded on: ${formattedDate}</div>
-            </div>
-        </body>
-        </html>
-        `
-}
-
-export const videoPlayer = (
-	imageUrl: string,
-	contentType: string,
-	id: string,
-	formattedDate: string
-) => {
-	return `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <meta name="twitter:card" content="summary_large_image">
-            <meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
-            <meta property="og:type" content="video.other">
-            <meta property="og:video:url" content="${imageUrl}">
-            <meta property="og:video:type" content="${contentType}" />
-            <link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
-            <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
-            <link rel="stylesheet" href="https://nyan.be/raw/styles.css">
-            <title>Nyan.be - Video Viewer</title>
-        </head>
-        <body>
-            <div class="branding"><a href="https://nyan.be">nyan.be</a></div>
-            <div class="container">
-                <video controls>
-                    <source src="${imageUrl}" type="${contentType}">
-                    Your browser does not support the video tag.
-                </video>
-                <div class="date">Uploaded on: ${formattedDate}</div>
-            </div>
-        </body>
-        </html>
-        `
+    const isImage = contentType.startsWith("image/");
+    const isVideo = contentType.startsWith("video/");
+  
+    const headTags = isImage
+      ? `
+        <meta property="og:image" content="${url}" />
+        <meta property="og:image:type" content="${contentType}" />
+        <title>${siteConfig.TITLE} - Image Viewer</title>
+      `
+      : `
+        <meta property="og:type" content="video.other">
+        <meta property="og:video:url" content="${url}">
+        <meta property="og:video:type" content="${contentType}" />
+        <title>${siteConfig.TITLE} - Video Viewer</title>
+      `;
+  
+    const bodyContent = isImage
+      ? `<img src="${url}" alt="image" />`
+      : `
+        <video controls>
+          <source src="${url}" type="${contentType}">
+          Your browser does not support the video tag.
+        </video>
+      `;
+  
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="theme-color" content="${siteConfig.DEFAULT_EMBED_COLOR}">
+        <link type="application/json+oembed" href="https://nyan.be/raw/${id}/json" />
+        <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://nyan.be/raw/styles.css">
+        ${headTags}
+      </head>
+      <body>
+        <div class="branding"><a href="${siteConfig.BASE_URL}">${siteConfig.TITLE}</a></div>
+        <div class="container">
+          ${bodyContent}
+          <div class="date">Uploaded on: ${formattedDate}</div>
+        </div>
+      </body>
+      </html>
+    `;
 }

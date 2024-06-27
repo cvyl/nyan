@@ -1,7 +1,7 @@
 export const siteConfig = {
 	BASE_URL: 'https://nyan.be',
-	TITLE: 'Nyan.be',
-	DESCRIPTION: 'Nyan.be is an anonymous upload service.',
+	TITLE: 'nyan.be',
+	DESCRIPTION: 'Free Anonymous File Hosting',
 	DEFAULT_EMBED_COLOR: '#7289DA',
 	MAX_FILE_SIZE: 1024 * 1024 * 100
 }
@@ -12,7 +12,7 @@ export const loggerConfig = {
 	L_FOOTER_URL: 'https://boymoder.org',
 	L_EMBED_COLOR: 6291674,
 	L_EMBED_COLOR_ERROR: 14286848,
-	L_USERNAME: 'Nyan.be - Upload Logs'
+	L_USERNAME: `${siteConfig.TITLE} - Upload Logs`
 }
 
 export const openGraphConfig = {
@@ -22,8 +22,8 @@ export const openGraphConfig = {
 }
 
 export const oEmbedConfig = {
-	O_PROVIDER_URL: 'https://nyan.be',
-	O_DEFAULT_PROVIDER_NAME: 'Nyan.be - Anonymous Upload Service'
+	O_PROVIDER_URL: `${siteConfig.BASE_URL}`,
+	O_DEFAULT_PROVIDER_NAME: `${siteConfig.TITLE} - Anonymous Upload Service`
 }
 
 export const toggles = {

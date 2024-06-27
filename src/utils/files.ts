@@ -1,7 +1,7 @@
 import { IRequestStrict } from 'itty-router/types'
 import { Env } from '../types'
 import { disallowedTypes, siteConfig, specialTypes } from '../config'
-import { videoPlayer, imageViewer } from './html'
+import { mediaViewer } from './html'
 import { createJSONResponse, returnJSON } from './webhook'
 
 export const getRawfile = async (
@@ -94,14 +94,8 @@ export const getFile = async (
 		}
 	}
 
-	if (contentType.startsWith('video/')) {
-		return new Response(videoPlayer(imageUrl, contentType, id, formattedDate), {
-			headers: { 'Content-Type': 'text/html' }
-		})
-	}
 
-	//imageViewer(imageUrl, id, formattedDate)
-	return new Response(imageViewer(imageUrl, contentType, id, formattedDate), {
+	return new Response(mediaViewer(imageUrl, contentType, id, formattedDate), {
 		headers: { 'Content-Type': 'text/html' }
 	})
 }
