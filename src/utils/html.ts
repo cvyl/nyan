@@ -15,90 +15,70 @@ const defaultHeadTags = `
 export const homePage = `
 <!DOCTYPE html>
 <html>
-<head>
-    ${defaultHeadTags}
-    <meta property="og:description" content="${siteConfig.DESCRIPTION}" />
-    <title>${siteConfig.TITLE} - ${siteConfig.DESCRIPTION}</title>
+    <head>
+        ${defaultHeadTags}
+        <meta property="og:description" content="${siteConfig.DESCRIPTION}" />
+        <title>${siteConfig.TITLE} - ${siteConfig.DESCRIPTION}</title>
 
-    <style>
-        a,
-        a:hover,
-        a:visited,
-        a:active {
-            color: inherit;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <img
-        style="width:95%; border-radius: 1%;"
-        src="https://nyan.be/raw/1719438473" alt="banner" />
-        <h1>Upload Your Files</h1><span>Free Anonymous File Hosting | 100 MB File Limit</span>
-    </header>
-    <main>
-        <input type="file" id="fileInput" />
-        <button id="uploadButton">Upload</button>
-        <div id="fileUrls" style="display: block;"></div>
-    </main>
-    <footer>
-        <p>© 2024 <a href="https://nyan.be">nyan.be</a> | <a href="https://nyan.be/rules">Rules & Privacy Policy</a> | <a href="mailto:abuse@nyan.be">Report Abuse</a></p>
-    </footer>
-    <script>
-        document.getElementById("uploadButton").addEventListener("click", async function() {
-            var fileInput = document.getElementById("fileInput");
-            var files = fileInput.files;
+        <style>
+            a,
+            a:hover,
+            a:visited,
+            a:active {
+	            color: inherit;
+	            text-decoration: none;
+        </style>
+    </head>
+    <body>
+        <header>
+            <img
+            style="width:95%; border-radius: 1%;"
+            src="https://nyan.be/raw/1719438473" alt="banner" />
+            <h1>Upload Your File</h1><span>Free Anonymous File Hosting | 100 MB File Limit</span>
+        </header>
+        <main>
+            <input type="file" id="fileInput" />
+            <button id="uploadButton">Upload</button>
+            <input type="text" id="fileUrl" readonly />
+        </main>
+        <footer id="fileInput">
+            <p>© 2024 <a href="https://nyan.be">nyan.be</a> | <a href="https://nyan.be/rules">Rules & Privacy Policy</a> | <a href="mailto:abuse@nyan.be">Report Abuse</a></p>
+        </footer>
+        <script>
+            document.getElementById("uploadButton").addEventListener("click", function() {
+                var fileInput = document.getElementById("fileInput");
+                var file = fileInput.files[0];
 
-            if (files.length > 0) {
-                var fileUrlsDiv = document.getElementById("fileUrls");
-                fileUrlsDiv.innerHTML = ''; // Clear previous URLs
+                if (file) {
+                    var formData = new FormData();
+                    formData.append("file", file);
 
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    // check if too many files (max 4)
-                    if (files.length > 4) {
-                        alert("You can only upload 4 files at a time.");
-                        break;
-                    }
-                    try {
-                        const response = await uploadFile(file);
-                        const data = await response.json();
+                    fetch("/anonUpload", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": file.type,
+                            "Content-Length": file.size
+                        },
+                        body: file
+                    })
+                    .then(response => response.json())
+                    .then(data => {
                         if (data.success) {
-                            var fileUrlInput = document.createElement("input");
-                            fileUrlInput.type = "text";
+                            var fileUrlInput = document.getElementById("fileUrl");
                             fileUrlInput.value = data.image;
-                            fileUrlInput.readOnly = true;
-                            fileUrlInput.style = "display: block;";
-                            fileUrlsDiv.appendChild(fileUrlInput);
+                            fileUrlInput.style.display = "block";
                         }
-                    } catch (error) {
+                    })
+                    .catch(error => {
                         console.error(error);
-                    }
-
-                    // Delay before next upload
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    });
+                } else {
+                    alert("Please select a file to upload.");
                 }
-            } else {
-                alert("Please select files to upload.");
-            }
-        });
-
-        async function uploadFile(file) {
-            return fetch("/anonUpload", {
-                method: "POST",
-                headers: {
-                    "Content-Type": file.type,
-                    "Content-Length": file.size
-                },
-                body: file
             });
-        }
-    </script>
-</body>
+        </script>
+    </body>
 </html>
-
-
 `
 
 export const rulesPage = `
